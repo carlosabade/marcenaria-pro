@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marcenaria Pro</title>
+
+  <!-- PWA Configuration -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#92400e" />
+  <meta name="description" content="Sistema profissional de gestão para marcenarias" />
+
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MarcPro" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+
+  <!-- Android PWA Support -->
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              50: '#fbf8f6',
+              100: '#f5efe9',
+              200: '#ebdccf',
+              300: '#dcc0ad',
+              400: '#c59d85',
+              500: '#a8795d',
+              600: '#8c5e45',
+              700: '#5c3a28',
+              800: '#2e1d15',
+              900: '#1e120d',
+              950: '#0f0805',
+            },
+            wood: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+              950: '#451a03',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "recharts": "https://esm.sh/recharts@^3.5.1",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.4"
+  }
+}
+</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-slate-900 text-slate-100 h-screen overflow-hidden selection:bg-wood-500 selection:text-white">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((registration) => {
+            console.log('✅ Service Worker registrado com sucesso:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('❌ Falha ao registrar Service Worker:', error);
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>

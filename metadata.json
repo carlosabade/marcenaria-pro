@@ -1,0 +1,7 @@
+{
+  "name": "Marcenaria Pro",
+  "description": "Gestão completa para marceneiros: controle de custos, orçamentos e gastos por comando de voz.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
