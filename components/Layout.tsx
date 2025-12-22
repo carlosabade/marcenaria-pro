@@ -64,12 +64,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
             title={syncStatus === 'current' ? 'Backup em dia' : 'Backup necessário'}
           >
             <Icons.Box className={`w-5 h-5 ${syncStatus === 'current' ? 'text-green-500' :
-                syncStatus === 'outdated' ? 'text-orange-500 animate-pulse' :
-                  'text-slate-500'
+              syncStatus === 'outdated' ? 'text-orange-500 animate-pulse' :
+                'text-slate-500'
               }`} />
             <div className={`w-2 h-2 rounded-full absolute top-1 right-1 border border-slate-800 ${syncStatus === 'current' ? 'bg-green-500' :
-                syncStatus === 'outdated' ? 'bg-orange-500' :
-                  'bg-slate-600'
+              syncStatus === 'outdated' ? 'bg-orange-500' :
+                'bg-slate-600'
               }`}></div>
           </button>
 
@@ -84,9 +84,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           <button
             onClick={() => {
               if (confirm("Tem certeza que deseja sair?")) {
-                import('../services/storageService').then(mod => {
-                  mod.logoutUser().then(() => window.location.reload());
-                });
+                logoutUser().then(() => window.location.reload());
               }
             }}
             className="text-slate-300 p-2 hover:bg-red-900/20 hover:text-red-400 rounded-full transition-colors"
@@ -115,8 +113,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                   setMobileMenuOpen(false);
                 }}
                 className={`flex items-center gap-4 p-4 rounded-xl transition-all border ${activeTab === item.id
-                    ? 'bg-wood-900/20 text-wood-400 border-wood-600/50 shadow-lg shadow-wood-900/20'
-                    : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                  ? 'bg-wood-900/20 text-wood-400 border-wood-600/50 shadow-lg shadow-wood-900/20'
+                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                   }`}
               >
                 <div className={`p-2 rounded-lg ${activeTab === item.id ? 'bg-wood-600 text-white' : 'bg-slate-900 text-slate-400'}`}>

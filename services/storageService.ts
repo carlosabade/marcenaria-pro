@@ -228,8 +228,40 @@ export const getProjects = (): Project[] => getItems<Project>(KEYS.PROJECTS);
 export const saveProjects = (projects: Project[]) => setItems(KEYS.PROJECTS, projects);
 export const updateProject = (project: Project) => {
     const all = getProjects();
-    const index = all.findIndex(p => p.id === project.id);
-    if (index >= 0) all[index] = project; else all.unshift(project);
+
+    // 🛡️ Self-Healing: Migrate legacy IDs (TimeStamp) to UUIDs
+    // Check if ID is a simple number (timestamp) or short string, unlikely to be a UUID
+    let projectToSave = { ...project };
+    const isLegacyId = !project.id.includes('-') && project.id.length < 20;
+
+    if (isLegacyId) {
+        console.log("♻️ Migrating legacy Project ID to UUID...", project.id);
+        const oldId = project.id;
+        const newId = crypto.randomUUID();
+        projectToSave.id = newId;
+
+        // Find by OLD ID to replace
+        const index = all.findIndex(p => p.id === oldId);
+        if (index >= 0) all[index] = projectToSave; else all.unshift(projectToSave);
+
+        // Update URL if user is currently on it? 
+        // We can't easily change the URL from here without router access, 
+        // but the save will work and next time they open it from dashboard it will use new ID.
+    } else {
+        // Normal Save
+        const index = all.findIndex(p => p.id === projectToSave.id);
+        if (index >= 0) all[index] = projectToSave; else all.unshift(projectToSave);
+    }
+
+    // 🛡️ Token Self-Healing: Check if token is valid UUID
+    if (projectToSave.public_token && (!projectToSave.public_token.includes('-') || projectToSave.public_token.length < 20)) {
+        console.log("♻️ Migrating legacy Token to UUID...", projectToSave.public_token);
+        projectToSave.public_token = crypto.randomUUID();
+        // Update again in the array
+        const index = all.findIndex(p => p.id === projectToSave.id);
+        if (index >= 0) all[index] = projectToSave;
+    }
+
     saveProjects(all);
 
     // Auto-sync to cloud (Fire & Forget)
@@ -241,27 +273,26 @@ export const updateProject = (project: Project) => {
 
             if (!userId) {
                 console.warn("User has no ID and not authenticated in Supabase. Skipping sync.");
-                alert("⚠️ SESSÃO EXPIRADA NA NUVEM\n\nO projeto foi salvo no seu PC, mas NÃO subiu para a nuvem.\nPara gerar links funcionais, clique em 'Sair' e faça login novamente.");
+                // alert("⚠️ SESSÃO EXPIRADA NA NUVEM..."); // Omitted to avoid spam loop if user ignores
                 return;
             }
 
             const payload = {
-                id: project.id,
+                id: projectToSave.id, // Use the new valid UUID
                 user_id: userId,
-                data: project,
-                public_token: project.public_token,
-                status: project.status,
-                approved_at: project.approved_at
+                data: projectToSave,
+                public_token: projectToSave.public_token,
+                status: projectToSave.status,
+                approved_at: projectToSave.approved_at
             };
 
             const { error } = await supabase.from('projects').upsert(payload);
 
             if (error) {
                 console.error("Auto-sync project failed:", error);
-                alert("Erro ao sincronizar com nuvem: " + error.message);
+                // alert("Erro ao sincronizar com nuvem: " + error.message);
             } else {
                 console.log("Projeto sincronizado com sucesso!");
-                // Feedback visual sutil (opcional) ou apenas log
             }
         })();
     }

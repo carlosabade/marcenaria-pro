@@ -159,7 +159,7 @@ const Projects: React.FC = () => {
         const totalHours = (prodDays + assDays) * settings.workingHoursPerDay;
 
         const newProject: Project = {
-            id: editingId === 'new' ? Date.now().toString() : (editingId as string),
+            id: editingId === 'new' ? crypto.randomUUID() : (editingId as string),
             clientName: form.clientName || '',
             clientCpf: form.clientCpf || '',
             clientAddress: form.clientAddress || '',
@@ -360,9 +360,11 @@ const Projects: React.FC = () => {
                 // Quick reconstruct mimicking handleSave logic partially or calling it?
                 // Calling handleSave() directly might be tricky due to closures.
                 // Better: Update directly using the service
+                const newId = editingId === 'new' ? crypto.randomUUID() : (editingId as string);
+
                 const projectToSave: Project = {
                     ...(form as Project), // Base on current form
-                    id: editingId === 'new' ? Date.now().toString() : (editingId as string),
+                    id: newId,
                     public_token: token,
                     // Ensure defaults for safety to avoid validation errors if user hit share early
                     status: (form.status as any) || 'active',

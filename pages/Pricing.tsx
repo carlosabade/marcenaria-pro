@@ -64,7 +64,9 @@ const Pricing = () => {
                         </div>
                         <span className="font-bold text-lg tracking-tight text-white">Marcenaria <span className="text-wood-500">Pro</span></span>
                     </div>
-                    <a href="/" className="text-slate-400 hover:text-white text-sm font-medium transition-colors">Voltar</a>
+                    <button onClick={() => navigate(-1)} className="text-slate-400 hover:text-white text-sm font-medium transition-colors">
+                        Voltar
+                    </button>
                 </div>
             </div>
 
