@@ -275,13 +275,22 @@ export const updateProject = async (project: Project): Promise<void> => {
             return;
         }
 
+        // Payload with ALL required columns + data JSONB
         const payload = {
-            id: projectToSave.id, // Use the new valid UUID
+            id: projectToSave.id,
             user_id: userId,
-            data: projectToSave,
+            client_name: projectToSave.clientName,
+            client_cpf: projectToSave.clientCpf || null,
+            client_address: projectToSave.clientAddress || null,
+            client_city: projectToSave.clientCity || null,
+            project_type: projectToSave.projectType,
+            start_date: projectToSave.startDate,
+            deadline: projectToSave.deadline,
+            deadline_notified: projectToSave.deadlineNotified || false,
+            data: projectToSave, // Full project object in JSONB
             public_token: projectToSave.public_token,
-            status: projectToSave.status,
-            approved_at: projectToSave.approved_at
+            status: projectToSave.status || 'active',
+            approved_at: projectToSave.approved_at || null
         };
 
         console.log("🚀 Salvando projeto no Supabase:", payload);
