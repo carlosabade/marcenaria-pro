@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AIStudio = () => {
+const AIStudio: React.FC = () => {
     return (
         <div className="p-8">
             <h1 className="text-3xl font-bold text-white mb-4">🎨 Laboratório de IA</h1>
