@@ -266,17 +266,27 @@ export const updateProject = async (project: Project): Promise<void> => {
 
     // Auto-sync to cloud (NOW RETURNS PROMISE)
     const user = getUser();
+    console.log("🔍 [DEBUG] User from getUser():", user);
+
     if (user) {
         // ✅ Only sync if project has minimum required data
         const hasRequiredData = projectToSave.clientName && projectToSave.projectType && projectToSave.startDate && projectToSave.deadline;
+        console.log("🔍 [DEBUG] hasRequiredData:", hasRequiredData, {
+            clientName: projectToSave.clientName,
+            projectType: projectToSave.projectType,
+            startDate: projectToSave.startDate,
+            deadline: projectToSave.deadline
+        });
 
         if (!hasRequiredData) {
             console.log("⏭️ Skipping Supabase sync - project missing required fields (clientName, projectType, startDate, or deadline)");
             return; // Save locally but don't sync to cloud yet
         }
 
+        console.log("🔍 [DEBUG] Getting Supabase user...");
         const { data: { user: supabaseUser } } = await supabase.auth.getUser();
         const userId = supabaseUser?.id;
+        console.log("🔍 [DEBUG] Supabase userId:", userId);
 
         if (!userId) {
             console.warn("User has no ID and not authenticated in Supabase. Skipping sync.");
@@ -311,6 +321,8 @@ export const updateProject = async (project: Project): Promise<void> => {
         } else {
             console.log("✅ Projeto sincronizado com sucesso!");
         }
+    } else {
+        console.log("⏭️ Skipping Supabase sync - no user logged in");
     }
 };
 

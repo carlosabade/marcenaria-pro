@@ -348,6 +348,7 @@ const Projects: React.FC = () => {
     };
 
     const handleShare = async () => {
+        console.log("🔍 [DEBUG] handleShare called");
         let token = form.public_token;
 
         // 🛡️ Ensure Token is Valid UUID (Migrate if legacy)
@@ -360,6 +361,9 @@ const Projects: React.FC = () => {
             const updatedProjects = projects.map(p => p.id === form.id ? { ...p, public_token: token } : p);
             setProjects(updatedProjects);
         }
+
+        console.log("🔍 [DEBUG] Token:", token);
+        console.log("🔍 [DEBUG] Form data:", { clientName: form.clientName, projectType: form.projectType });
 
         // 🔥 CRITICAL: Save immediately to DB so the link works!
         if (form.clientName && form.projectType) {
@@ -375,17 +379,25 @@ const Projects: React.FC = () => {
                 finalPrice: financials ? financials.suggestedPrice : (Number(form.materialsCost) * 2), // Fallback
                 clientName: form.clientName || 'Cliente',
                 projectType: form.projectType || 'Projeto',
-                createdAt: form.createdAt || new Date().toISOString()
+                startDate: form.startDate || new Date().toISOString()
             };
 
-            // ✅ AWAIT the save operation to ensure it completes before generating link
-            await updateProject(projectToSave);
-            setProjects(getProjects()); // Refresh list
-            setIsDirty(false); // Mark as saved
+            console.log("🔍 [DEBUG] Calling updateProject...");
+            try {
+                // ✅ AWAIT the save operation to ensure it completes before generating link
+                await updateProject(projectToSave);
+                console.log("🔍 [DEBUG] updateProject completed successfully");
+                setProjects(getProjects()); // Refresh list
+                setIsDirty(false); // Mark as saved
 
-            // Update editingId if it was 'new'
-            if (editingId === 'new') {
-                setEditingId(newId);
+                // Update editingId if it was 'new'
+                if (editingId === 'new') {
+                    setEditingId(newId);
+                }
+            } catch (error) {
+                console.error("🔍 [DEBUG] updateProject failed:", error);
+                alert(`Erro ao salvar projeto: ${error}`);
+                return;
             }
         } else {
             alert("Por favor, preencha pelo menos o Nome do Cliente e Tipo de Móvel antes de gerar o link.");
