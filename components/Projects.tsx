@@ -347,7 +347,7 @@ const Projects: React.FC = () => {
         }, 100);
     };
 
-    const handleShare = () => {
+    const handleShare = async () => {
         let token = form.public_token;
 
         // 🛡️ Ensure Token is Valid UUID (Migrate if legacy)
@@ -378,10 +378,15 @@ const Projects: React.FC = () => {
                 createdAt: form.createdAt || new Date().toISOString()
             };
 
-            // Call storage service (which auto-syncs)
-            updateProject(projectToSave);
+            // ✅ AWAIT the save operation to ensure it completes before generating link
+            await updateProject(projectToSave);
             setProjects(getProjects()); // Refresh list
             setIsDirty(false); // Mark as saved
+
+            // Update editingId if it was 'new'
+            if (editingId === 'new') {
+                setEditingId(newId);
+            }
         } else {
             alert("Por favor, preencha pelo menos o Nome do Cliente e Tipo de Móvel antes de gerar o link.");
             return;
