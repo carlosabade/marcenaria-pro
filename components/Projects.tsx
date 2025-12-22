@@ -178,6 +178,7 @@ const Projects: React.FC = () => {
             freightCost: Number(form.freightCost) || 0,
             estimatedHours: totalHours,
             estimatedDays: prodDays + assDays,
+            finalPrice: financials.suggestedPrice, // Save this!
             marginPercent: Number(form.marginPercent) || MIN_MARGIN,
             taxPercent: Number(form.taxPercent) || 0,
             carpenterPercent: Number(form.carpenterPercent) || 0,
@@ -346,6 +347,48 @@ const Projects: React.FC = () => {
         }, 100);
     };
 
+    const handleShare = () => {
+        let token = form.public_token;
+        if (!token) {
+            token = crypto.randomUUID();
+            const updatedForm = { ...form, public_token: token };
+            setForm(updatedForm); // Update UI
+
+            // 🔥 CRITICAL: Save immediately to DB so the link works!
+            // We need to construct a full project object to save
+            if (form.clientName && form.projectType) {
+                // Quick reconstruct mimicking handleSave logic partially or calling it?
+                // Calling handleSave() directly might be tricky due to closures.
+                // Better: Update directly using the service
+                const projectToSave: Project = {
+                    ...(form as Project), // Base on current form
+                    id: editingId === 'new' ? Date.now().toString() : (editingId as string),
+                    public_token: token,
+                    // Ensure defaults for safety to avoid validation errors if user hit share early
+                    status: (form.status as any) || 'active',
+                    materialsCost: Number(form.materialsCost) || 0,
+                    finalPrice: financials ? financials.suggestedPrice : (Number(form.materialsCost) * 2), // Fallback
+                    // Ensure required fields
+                    clientName: form.clientName || 'Cliente',
+                    projectType: form.projectType || 'Projeto',
+                    createdAt: form.createdAt || new Date().toISOString()
+                };
+
+                // Call storage service (which auto-syncs)
+                updateProject(projectToSave);
+                setProjects(getProjects()); // Refresh list
+                setIsDirty(false); // Mark as saved
+            } else {
+                alert("Por favor, preencha pelo menos o Nome do Cliente e Tipo de Móvel antes de gerar o link.");
+                return;
+            }
+        }
+
+        const url = `${window.location.origin}/p/${token}`;
+        navigator.clipboard.writeText(url);
+        alert(`🔗 Link Gerado e Salvo!\n\n${url}\n\nCopiado para a área de transferência.`);
+    };
+
     const financials = editingId ? calculateProjectFinancials(form, effectiveSettings) : null;
     const currentUser = getUser();
     const isFreeUser = currentUser?.plan === 'free';
@@ -490,6 +533,9 @@ const Projects: React.FC = () => {
                         </div>
 
                         <div className="flex gap-2">
+                            <button onClick={handleShare} className="bg-wood-600 hover:bg-wood-500 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+                                <Icons.Share className="w-4 h-4" /> Link do Cliente
+                            </button>
                             <button onClick={() => handleExportPDF('quote')} className="bg-wood-700 hover:bg-wood-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
                                 <Icons.Download className="w-4 h-4" /> Orçamento PDF
                             </button>

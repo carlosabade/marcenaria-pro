@@ -231,6 +231,40 @@ export const updateProject = (project: Project) => {
     const index = all.findIndex(p => p.id === project.id);
     if (index >= 0) all[index] = project; else all.unshift(project);
     saveProjects(all);
+
+    // Auto-sync to cloud (Fire & Forget)
+    const user = getUser();
+    if (user) {
+        (async () => {
+            const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+            const userId = supabaseUser?.id;
+
+            if (!userId) {
+                console.warn("User has no ID and not authenticated in Supabase. Skipping sync.");
+                alert("⚠️ SESSÃO EXPIRADA NA NUVEM\n\nO projeto foi salvo no seu PC, mas NÃO subiu para a nuvem.\nPara gerar links funcionais, clique em 'Sair' e faça login novamente.");
+                return;
+            }
+
+            const payload = {
+                id: project.id,
+                user_id: userId,
+                data: project,
+                public_token: project.public_token,
+                status: project.status,
+                approved_at: project.approved_at
+            };
+
+            const { error } = await supabase.from('projects').upsert(payload);
+
+            if (error) {
+                console.error("Auto-sync project failed:", error);
+                alert("Erro ao sincronizar com nuvem: " + error.message);
+            } else {
+                console.log("Projeto sincronizado com sucesso!");
+                // Feedback visual sutil (opcional) ou apenas log
+            }
+        })();
+    }
 };
 
 export const checkProjectDeadlines = () => {
@@ -286,7 +320,17 @@ export const getCompanyProfile = (): CompanyProfile => {
         };
     }
 };
-export const saveCompanyProfile = (profile: CompanyProfile) => localStorage.setItem(KEYS.COMPANY, JSON.stringify(profile));
+export const saveCompanyProfile = (profile: CompanyProfile) => {
+    localStorage.setItem(KEYS.COMPANY, JSON.stringify(profile));
+
+    // Auto-sync company profile (Fire & Forget)
+    const user = getUser();
+    if (user) {
+        supabase.from('company').upsert({ email: user.email, data: profile }).then(res => {
+            if (res.error) console.error("Auto-sync company failed:", res.error);
+        });
+    }
+};
 
 export const getUser = (): UserProfile | null => {
     const data = localStorage.getItem(KEYS.USER);

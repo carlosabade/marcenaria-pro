@@ -8,7 +8,7 @@ import FixedCosts from './FixedCosts';
 
 const Settings: React.FC = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'profile' | 'company' | 'contract' | 'costs' | 'sync' | 'devices'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'company' | 'contract' | 'portal' | 'costs' | 'sync' | 'devices'>('profile');
     const [profile, setProfile] = useState<CompanyProfile>({
         name: '',
         cnpj: '',
@@ -134,6 +134,7 @@ const Settings: React.FC = () => {
                 <button onClick={() => setActiveTab('profile')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'profile' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Meu Perfil</button>
                 <button onClick={() => setActiveTab('company')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'company' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Dados da Empresa</button>
                 <button onClick={() => setActiveTab('contract')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'contract' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Modelo de Contrato</button>
+                <button onClick={() => setActiveTab('portal')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'portal' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Portal do Cliente</button>
                 <button onClick={() => setActiveTab('devices')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'devices' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Dispositivos</button>
                 <button onClick={() => setActiveTab('costs')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'costs' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Custos & Oficina</button>
                 <button onClick={() => setActiveTab('sync')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'sync' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Sincronização</button>
@@ -226,44 +227,74 @@ const Settings: React.FC = () => {
                 </div>
             )}
 
-            {activeTab === 'contract' && (
-                <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 animate-fade-in space-y-6">
-                    <div className="flex justify-between items-center mb-4">
+            {activeTab === 'portal' && (
+                <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 animate-fade-in space-y-8">
+                    <div className="flex items-start gap-4 p-4 bg-wood-900/20 border border-wood-600/30 rounded-lg">
+                        <Icons.Zap className="w-6 h-6 text-wood-500 mt-1" />
                         <div>
-                            <h3 className="text-lg font-bold text-white">Modelo Padrão de Contrato</h3>
-                            <p className="text-xs text-slate-400">Este modelo será copiado para todos os novos orçamentos.</p>
+                            <h3 className="text-lg font-bold text-white">Identidade do Portal</h3>
+                            <p className="text-slate-400 text-sm">Personalize como seus clientes verão os orçamentos. Essas informações aparecerão no link público.</p>
                         </div>
-                        <button onClick={handleAddClause} className="bg-wood-600 hover:bg-wood-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-lg transition-all">
-                            <Icons.Plus className="w-4 h-4" /> Adicionar Cláusula
-                        </button>
                     </div>
 
-                    <div className="space-y-4">
-                        {profile.contractTemplate?.map((clause) => (
-                            <div key={clause.id} className="bg-slate-900/50 p-4 rounded-xl border border-slate-700 group">
-                                <div className="flex justify-between items-center mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Nome de Exibição</label>
+                                <input
+                                    value={profile.company_name || profile.name}
+                                    onChange={e => handleProfileChange('company_name', e.target.value)}
+                                    placeholder={profile.name}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-wood-500"
+                                />
+                                <p className="text-[10px] text-slate-500 mt-1">Nome que aparecerá no topo do orçamento.</p>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Cor Principal (Tema)</label>
+                                <div className="flex gap-2 items-center">
                                     <input
-                                        value={clause.title}
-                                        onChange={(e) => handleUpdateClause(clause.id, 'title', e.target.value)}
-                                        className="bg-transparent text-wood-400 font-bold uppercase text-xs border-b border-transparent focus:border-wood-500 outline-none w-2/3"
+                                        type="color"
+                                        value={profile.company_color_primary || '#d97706'}
+                                        onChange={e => handleProfileChange('company_color_primary', e.target.value)}
+                                        className="h-10 w-20 bg-slate-900 border border-slate-700 rounded cursor-pointer"
                                     />
-                                    <button onClick={() => handleDeleteClause(clause.id)} className="text-slate-600 hover:text-red-500 transition-colors">
-                                        <Icons.Trash className="w-4 h-4" />
-                                    </button>
+                                    <span className="text-slate-400 text-sm">{profile.company_color_primary || '#d97706'}</span>
                                 </div>
-                                <textarea
-                                    value={clause.text}
-                                    onChange={(e) => handleUpdateClause(clause.id, 'text', e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-300 outline-none focus:border-wood-500 min-h-[100px]"
-                                    placeholder="Use tags como {{CLIENTE_NOME}}, {{VALOR_TOTAL}}, {{DESCRICAO_ITENS}}..."
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">WhatsApp de Contato</label>
+                                <input
+                                    value={profile.company_phone || profile.contact}
+                                    onChange={e => handleProfileChange('company_phone', e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-wood-500"
                                 />
                             </div>
-                        ))}
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Email Público</label>
+                                <input
+                                    value={profile.company_email || ''}
+                                    onChange={e => handleProfileChange('company_email', e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-wood-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Site / Instagram</label>
+                                <input
+                                    value={profile.company_website || ''}
+                                    onChange={e => handleProfileChange('company_website', e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-wood-500"
+                                    placeholder="instagram.com/suamarcenaria"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex justify-end pt-6 border-t border-slate-700">
                         <button onClick={handleSaveAll} disabled={!isDirty} className={`px-8 py-3 rounded-lg flex items-center gap-2 font-bold transition-all ${isDirty ? 'bg-wood-600 text-white shadow-lg' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
-                            <Icons.Save className="w-5 h-5" /> Salvar Modelo Padrão
+                            <Icons.Save className="w-5 h-5" /> Salvar Configurações
                         </button>
                     </div>
                 </div>

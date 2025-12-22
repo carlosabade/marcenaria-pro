@@ -110,11 +110,13 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onLogin }) => {
 
                     if (profileData?.data) {
                         const userProfile = profileData.data as UserProfile;
-                        saveUser(userProfile);
-                        onLogin(userProfile);
+                        // Garantir que o ID está salvo
+                        saveUser({ ...userProfile, id: authData.user.id });
+                        onLogin({ ...userProfile, id: authData.user.id });
                     } else {
                         // Se logou no Auth mas não tem perfil (caso raro, ou usuário antigo), criar um básico
                         const basicProfile: UserProfile = {
+                            id: authData.user.id, // Critical: capture ID
                             name: authData.user.user_metadata.full_name || 'Usuário',
                             email: email,
                             document: authData.user.user_metadata.document_id || '',

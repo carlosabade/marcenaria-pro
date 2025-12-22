@@ -58,7 +58,7 @@ export interface ProjectFeedback {
   id: string;
   date: string;
   message: string;
-  type: 'client' | 'internal'; 
+  type: 'client' | 'internal';
 }
 
 export type ModuleType = 'kitchen_base' | 'kitchen_upper' | 'wardrobe' | 'generic';
@@ -126,14 +126,19 @@ export interface Project {
   startDate: string;
   deadline: string;
   deadlineNotified?: boolean;
-  status: 'active' | 'completed' | 'quote' | 'pending_approval';
+  status: 'active' | 'completed' | 'quote' | 'pending_approval' | 'approved' | 'rejected';
+  public_token?: string;
+  approved_at?: string;
+  rejection_reason?: string;
+  client_view_count?: number;
   materialsCost: number;
-  materialsBreakdown?: MaterialBreakdown; 
+  finalPrice?: number; // Snapshot of the calculated price for public view
+  materialsBreakdown?: MaterialBreakdown;
   estimatedHours: number;
-  estimatedDays?: number; 
-  productionDays?: number; 
-  assemblyDays?: number; 
-  freightCost?: number; 
+  estimatedDays?: number;
+  productionDays?: number;
+  assemblyDays?: number;
+  freightCost?: number;
   marginPercent: number;
   taxPercent: number;
   carpenterPercent?: number;
@@ -147,7 +152,7 @@ export interface Project {
 export interface AppSettings {
   workingDaysPerMonth: number;
   workingHoursPerDay: number;
-  hourlyRate: number; 
+  hourlyRate: number;
   materialPrices: MaterialPrices;
 }
 
@@ -160,6 +165,15 @@ export interface CompanyProfile {
   signature?: string;
   defaultPaymentTerms?: string;
   contractTemplate?: ContractClause[]; // Modelo padrão de contrato da oficina
+  // Phase 2: Customer Portal Branding
+  company_name?: string; // Display name for portal (can be different from legal name)
+  company_logo_url?: string;
+  company_phone?: string;
+  company_address?: string;
+  company_email?: string;
+  company_website?: string;
+  company_color_primary?: string;
+  contract_terms?: string;
 }
 
 export type SubscriptionPlan = 'free' | 'monthly' | 'lifetime';
@@ -171,11 +185,12 @@ export interface DeviceInfo {
 }
 
 export interface UserProfile {
+  id?: string;
   name: string;
   email: string;
   document?: string;
   plan: SubscriptionPlan;
   subscriptionDate?: string;
   downloadCount: number;
-  devices: DeviceInfo[]; 
+  devices: DeviceInfo[];
 }

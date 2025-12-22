@@ -9,6 +9,7 @@ import Settings from './components/Settings';
 import AuthLogin from './components/AuthLogin';
 import Pricing from './pages/Pricing';
 import CheckoutSuccess from './pages/CheckoutSuccess';
+import PublicEstimate from './pages/PublicEstimate';
 import ProtectedRoute from './components/ProtectedRoute';
 import { supabase } from './services/supabaseClient';
 import { UserProfile, Appointment, Project } from './types';
@@ -112,6 +113,7 @@ const AppContent = () => {
       <Route path="/login" element={!user ? <AuthLogin onLogin={(u) => { setUser(u); navigate('/'); }} /> : <Navigate to="/" />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/checkout/success" element={<CheckoutSuccess />} />
+      <Route path="/p/:token" element={<PublicEstimate />} />
 
       {/* Routes wrapped in Layout */}
       <Route path="/" element={
