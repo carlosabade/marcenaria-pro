@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Icons } from './Icon';
-import { getLastSyncDate } from '../services/storageService';
+import { getLastSyncDate, logoutUser } from '../services/storageService';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,6 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'dashboard', label: 'Visão Geral', icon: Icons.Dashboard },
     { id: 'projects', label: 'Projetos', icon: Icons.Hammer },
     { id: 'clients', label: 'Clientes', icon: Icons.Users },
+    { id: 'ai-studio', label: 'Laboratório IA', icon: Icons.Zap },
     { id: 'settings', label: 'Configurações', icon: Icons.Settings },
   ];
 

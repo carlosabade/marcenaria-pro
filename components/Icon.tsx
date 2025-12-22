@@ -47,7 +47,7 @@ import {
   Star,
   Share2,
   Loader,
-  Image
+  FileImage
 } from 'lucide-react';
 
 export const Icons = {
@@ -97,5 +97,5 @@ export const Icons = {
   Star,
   Share: Share2,
   Loader,
-  Image
+  Image: FileImage
 };
