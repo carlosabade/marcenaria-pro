@@ -45,7 +45,9 @@ import {
   Lock,
   Check,
   Star,
-  Share2
+  Share2,
+  Loader,
+  Image
 } from 'lucide-react';
 
 export const Icons = {
@@ -93,5 +95,7 @@ export const Icons = {
   Lock,
   Check,
   Star,
-  Share: Share2
+  Share: Share2,
+  Loader,
+  Image
 };

@@ -7,6 +7,7 @@ import Projects from './components/Projects';
 import Clients from './components/Clients';
 import Settings from './components/Settings';
 import AuthLogin from './components/AuthLogin';
+import AIStudio from './components/AIStudio';
 import Pricing from './pages/Pricing';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import PublicEstimate from './pages/PublicEstimate';
@@ -43,11 +44,10 @@ const AppContent = () => {
               setUser(profile);
             }
           }
-        } else if (!localUser) {
-          setLoading(false);
-        } else {
-          setLoading(false);
         }
+
+        // Always stop loading after checks
+        setLoading(false);
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (event === 'SIGNED_OUT') {
@@ -144,6 +144,14 @@ const AppContent = () => {
         <ProtectedRoute>
           <Layout activeTab="settings" setActiveTab={handleNav}>
             <Settings />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/ai-studio" element={
+        <ProtectedRoute>
+          <Layout activeTab="ai-studio" setActiveTab={handleNav}>
+            <AIStudio />
           </Layout>
         </ProtectedRoute>
       } />

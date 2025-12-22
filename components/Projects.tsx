@@ -349,41 +349,42 @@ const Projects: React.FC = () => {
 
     const handleShare = () => {
         let token = form.public_token;
-        if (!token) {
+
+        // 🛡️ Ensure Token is Valid UUID (Migrate if legacy)
+        if (!token || !token.includes('-') || token.length < 20) {
             token = crypto.randomUUID();
             const updatedForm = { ...form, public_token: token };
-            setForm(updatedForm); // Update UI
+            setForm(updatedForm);
 
-            // 🔥 CRITICAL: Save immediately to DB so the link works!
-            // We need to construct a full project object to save
-            if (form.clientName && form.projectType) {
-                // Quick reconstruct mimicking handleSave logic partially or calling it?
-                // Calling handleSave() directly might be tricky due to closures.
-                // Better: Update directly using the service
-                const newId = editingId === 'new' ? crypto.randomUUID() : (editingId as string);
+            // Also update the local state list to prevent reversion
+            const updatedProjects = projects.map(p => p.id === form.id ? { ...p, public_token: token } : p);
+            setProjects(updatedProjects);
+        }
 
-                const projectToSave: Project = {
-                    ...(form as Project), // Base on current form
-                    id: newId,
-                    public_token: token,
-                    // Ensure defaults for safety to avoid validation errors if user hit share early
-                    status: (form.status as any) || 'active',
-                    materialsCost: Number(form.materialsCost) || 0,
-                    finalPrice: financials ? financials.suggestedPrice : (Number(form.materialsCost) * 2), // Fallback
-                    // Ensure required fields
-                    clientName: form.clientName || 'Cliente',
-                    projectType: form.projectType || 'Projeto',
-                    createdAt: form.createdAt || new Date().toISOString()
-                };
+        // 🔥 CRITICAL: Save immediately to DB so the link works!
+        if (form.clientName && form.projectType) {
+            const newId = editingId === 'new' ? crypto.randomUUID() : (editingId as string);
 
-                // Call storage service (which auto-syncs)
-                updateProject(projectToSave);
-                setProjects(getProjects()); // Refresh list
-                setIsDirty(false); // Mark as saved
-            } else {
-                alert("Por favor, preencha pelo menos o Nome do Cliente e Tipo de Móvel antes de gerar o link.");
-                return;
-            }
+            const projectToSave: Project = {
+                ...(form as Project), // Base on current form
+                id: newId,
+                public_token: token,
+                // Ensure defaults for safety to avoid validation errors if user hit share early
+                status: (form.status as any) || 'active',
+                materialsCost: Number(form.materialsCost) || 0,
+                finalPrice: financials ? financials.suggestedPrice : (Number(form.materialsCost) * 2), // Fallback
+                clientName: form.clientName || 'Cliente',
+                projectType: form.projectType || 'Projeto',
+                createdAt: form.createdAt || new Date().toISOString()
+            };
+
+            // Call storage service (which auto-syncs)
+            updateProject(projectToSave);
+            setProjects(getProjects()); // Refresh list
+            setIsDirty(false); // Mark as saved
+        } else {
+            alert("Por favor, preencha pelo menos o Nome do Cliente e Tipo de Móvel antes de gerar o link.");
+            return;
         }
 
         const url = `${window.location.origin}/p/${token}`;
