@@ -226,7 +226,7 @@ export const deleteClient = (id: string) => saveClients(getClients().filter(c =>
 
 export const getProjects = (): Project[] => getItems<Project>(KEYS.PROJECTS);
 export const saveProjects = (projects: Project[]) => setItems(KEYS.PROJECTS, projects);
-export const updateProject = (project: Project) => {
+export const updateProject = async (project: Project): Promise<void> => {
     const all = getProjects();
 
     // 🛡️ Self-Healing: Migrate legacy IDs (TimeStamp) to UUIDs
@@ -264,37 +264,36 @@ export const updateProject = (project: Project) => {
 
     saveProjects(all);
 
-    // Auto-sync to cloud (Fire & Forget)
+    // Auto-sync to cloud (NOW RETURNS PROMISE)
     const user = getUser();
     if (user) {
-        (async () => {
-            const { data: { user: supabaseUser } } = await supabase.auth.getUser();
-            const userId = supabaseUser?.id;
+        const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+        const userId = supabaseUser?.id;
 
-            if (!userId) {
-                console.warn("User has no ID and not authenticated in Supabase. Skipping sync.");
-                // alert("⚠️ SESSÃO EXPIRADA NA NUVEM..."); // Omitted to avoid spam loop if user ignores
-                return;
-            }
+        if (!userId) {
+            console.warn("User has no ID and not authenticated in Supabase. Skipping sync.");
+            return;
+        }
 
-            const payload = {
-                id: projectToSave.id, // Use the new valid UUID
-                user_id: userId,
-                data: projectToSave,
-                public_token: projectToSave.public_token,
-                status: projectToSave.status,
-                approved_at: projectToSave.approved_at
-            };
+        const payload = {
+            id: projectToSave.id, // Use the new valid UUID
+            user_id: userId,
+            data: projectToSave,
+            public_token: projectToSave.public_token,
+            status: projectToSave.status,
+            approved_at: projectToSave.approved_at
+        };
 
-            const { error } = await supabase.from('projects').upsert(payload);
+        console.log("🚀 Salvando projeto no Supabase:", payload);
 
-            if (error) {
-                console.error("Auto-sync project failed:", error);
-                // alert("Erro ao sincronizar com nuvem: " + error.message);
-            } else {
-                console.log("Projeto sincronizado com sucesso!");
-            }
-        })();
+        const { error } = await supabase.from('projects').upsert(payload);
+
+        if (error) {
+            console.error("❌ Auto-sync project failed:", error);
+            throw new Error(`Erro ao sincronizar com nuvem: ${error.message}`);
+        } else {
+            console.log("✅ Projeto sincronizado com sucesso!");
+        }
     }
 };
 
