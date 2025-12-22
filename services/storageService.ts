@@ -267,6 +267,14 @@ export const updateProject = async (project: Project): Promise<void> => {
     // Auto-sync to cloud (NOW RETURNS PROMISE)
     const user = getUser();
     if (user) {
+        // ✅ Only sync if project has minimum required data
+        const hasRequiredData = projectToSave.clientName && projectToSave.projectType && projectToSave.startDate && projectToSave.deadline;
+
+        if (!hasRequiredData) {
+            console.log("⏭️ Skipping Supabase sync - project missing required fields (clientName, projectType, startDate, or deadline)");
+            return; // Save locally but don't sync to cloud yet
+        }
+
         const { data: { user: supabaseUser } } = await supabase.auth.getUser();
         const userId = supabaseUser?.id;
 
