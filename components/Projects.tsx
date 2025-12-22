@@ -367,7 +367,20 @@ const Projects: React.FC = () => {
 
         // 🔥 CRITICAL: Save immediately to DB so the link works!
         if (form.clientName && form.projectType) {
-            const newId = editingId === 'new' ? crypto.randomUUID() : (editingId as string);
+            // ✅ Ensure ID is always a valid UUID (migrate legacy IDs)
+            let newId: string;
+            if (editingId === 'new') {
+                newId = crypto.randomUUID();
+            } else {
+                // Check if editingId is a valid UUID (has dashes and is long enough)
+                const isValidUUID = (editingId as string).includes('-') && (editingId as string).length >= 32;
+                if (isValidUUID) {
+                    newId = editingId as string;
+                } else {
+                    console.log("🔄 Migrating legacy project ID to UUID:", editingId);
+                    newId = crypto.randomUUID();
+                }
+            }
 
             const projectToSave: Project = {
                 ...(form as Project), // Base on current form

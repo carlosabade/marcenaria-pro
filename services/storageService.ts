@@ -302,7 +302,7 @@ export const updateProject = async (project: Project): Promise<void> => {
             client_address: projectToSave.clientAddress || null,
             client_city: projectToSave.clientCity || null,
             project_type: projectToSave.projectType,
-            start_date: projectToSave.startDate,
+            start_date: projectToSave.startDate || new Date().toISOString(), // Use current date if not provided
             deadline: projectToSave.deadline,
             deadline_notified: projectToSave.deadlineNotified || false,
             data: projectToSave, // Full project object in JSONB
