@@ -229,6 +229,60 @@ const Settings: React.FC = () => {
                     </div>
                 </div>
             )}
+            {activeTab === 'contract' && (
+                <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 animate-fade-in space-y-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Cláusulas do Contrato</h3>
+                            <p className="text-slate-400 text-sm">Personalize o texto padrão que sai nos seus contratos PDF.</p>
+                        </div>
+                        <button onClick={handleAddClause} className="bg-wood-600 hover:bg-wood-500 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                            <Icons.Plus className="w-4 h-4" /> Nova Cláusula
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {profile.contractTemplate?.map((clause, index) => (
+                            <div key={clause.id} className="bg-slate-900 border border-slate-700 rounded-lg p-4 group hover:border-wood-600/50 transition-colors">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex-1 mr-4">
+                                        <input
+                                            value={clause.title}
+                                            onChange={e => handleUpdateClause(clause.id, 'title', e.target.value)}
+                                            className="bg-transparent text-wood-500 font-bold uppercase text-sm w-full outline-none focus:bg-slate-800 rounded px-2 py-1"
+                                            placeholder="TÍTULO DA CLÁUSULA"
+                                        />
+                                    </div>
+                                    <button onClick={() => handleDeleteClause(clause.id)} className="text-slate-600 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Icons.Trash className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={clause.text}
+                                    onChange={e => handleUpdateClause(clause.id, 'text', e.target.value)}
+                                    className="w-full bg-slate-800/50 border border-slate-700 rounded p-3 text-slate-300 text-sm h-24 outline-none focus:border-wood-500 resize-y"
+                                    placeholder="Texto da cláusula..."
+                                />
+                            </div>
+                        ))}
+
+                        {(!profile.contractTemplate || profile.contractTemplate.length === 0) && (
+                            <div className="text-center py-12 border-2 border-dashed border-slate-700 rounded-xl">
+                                <p className="text-slate-500">Nenhuma cláusula definida.</p>
+                                <button onClick={handleAddClause} className="text-wood-500 font-bold mt-2 hover:underline">
+                                    Criar Cláusula Padrão
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-end pt-6 border-t border-slate-700">
+                        <button onClick={handleSaveAll} disabled={!isDirty} className={`px-8 py-3 rounded-lg flex items-center gap-2 font-bold transition-all ${isDirty ? 'bg-wood-600 text-white shadow-lg' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
+                            <Icons.Save className="w-5 h-5" /> Salvar Modelo
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {activeTab === 'portal' && (
                 <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 animate-fade-in space-y-8">
