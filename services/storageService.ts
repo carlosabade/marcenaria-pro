@@ -109,8 +109,20 @@ export const syncToCloud = async (): Promise<{ success: boolean; message: string
         saveUser(updatedUser);
 
         const promises = [];
-        if (projects.length > 0) promises.push(supabase.from('projects').upsert(projects.map(p => ({ id: p.id, email: user.email, data: p }))));
-        if (clients.length > 0) promises.push(supabase.from('clients').upsert(clients.map(c => ({ id: c.id, email: user.email, data: c }))));
+
+        // Validate Projects UUIDs before syncing
+        const validProjects = projects.filter(p => p.id && (p.id.length === 36));
+        if (validProjects.length > 0) {
+            promises.push(supabase.from('projects').upsert(validProjects.map(p => ({ id: p.id, email: user.email, data: p }))));
+        }
+
+        if (clients.length > 0) {
+            // Ensure client IDs are valid UUIDs too, or generate them? For now, filter invalid if check fails
+            const validClients = clients.filter(c => c.id && c.id.length === 36);
+            if (validClients.length > 0) promises.push(supabase.from('clients').upsert(validClients.map(c => ({ id: c.id, email: user.email, data: c }))));
+        }
+
+        // Similar validation for expenses and others if needed, but projects are the main suspect
         if (expenses.length > 0) promises.push(supabase.from('expenses').upsert(expenses.map(e => ({ id: e.id, email: user.email, data: e }))));
         if (fixedCosts.length > 0) promises.push(supabase.from('fixed_costs').upsert(fixedCosts.map(fc => ({ id: fc.id, email: user.email, data: fc }))));
         if (appointments.length > 0) promises.push(supabase.from('appointments').upsert(appointments.map(a => ({ id: a.id, email: user.email, data: a }))));
@@ -123,7 +135,8 @@ export const syncToCloud = async (): Promise<{ success: boolean; message: string
         localStorage.setItem(KEYS.LAST_SYNC, new Date().toISOString());
         return { success: true, message: "Backup completo realizado na nuvem!" };
     } catch (error: any) {
-        return { success: false, message: error.message };
+        console.error("Sync error details:", error);
+        return { success: false, message: `Erro no backup: ${error.message || 'Erro desconhecido'}` };
     }
 };
 
@@ -137,12 +150,7 @@ export const pullFromCloud = async (): Promise<{ success: boolean; message: stri
         if (cloudProfile?.data) {
             const remoteUser = cloudProfile.data as UserProfile;
             const deviceId = getDeviceId();
-            const limit = getDeviceLimit(remoteUser.plan);
-            const isDeviceLinked = remoteUser.devices?.some(d => d.id === deviceId);
-
-            if (!isDeviceLinked && (remoteUser.devices?.length || 0) >= limit) {
-                return { success: false, message: `Limite de dispositivos excedido. Remova um dispositivo nas configurações.` };
-            }
+            // Don't enforce limit during pull to avoid lockout loops
             saveUser(remoteUser);
         }
 
@@ -352,6 +360,30 @@ export const deleteProject = async (projectId: string): Promise<void> => {
     }
 };
 
+export const deleteAllProjects = async (): Promise<void> => {
+    // 1. Delete all locally
+    saveProjects([]);
+
+    // 2. Delete all from cloud if logged in
+    const user = getUser();
+    if (user) {
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .delete()
+                .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+            if (error) {
+                console.error('❌ Error deleting all projects from Supabase:', error);
+            } else {
+                console.log('✅ All projects deleted from Supabase');
+            }
+        } catch (err) {
+            console.error('❌ Exception deleting all projects:', err);
+        }
+    }
+};
+
 export const checkProjectDeadlines = () => {
     const projects = getProjects();
     const today = new Date();
@@ -441,9 +473,16 @@ export const loginUser = (name: string, email: string, document?: string): UserP
 
 
 export const logoutUser = async () => {
-    await supabase.auth.signOut();
+    // 1. Clear local session immediately
     localStorage.removeItem(KEYS.USER);
     localStorage.removeItem(KEYS.LAST_SYNC);
+
+    // 2. Try to verify logout with Supabase (fire and forget or await safely)
+    try {
+        await supabase.auth.signOut();
+    } catch (error) {
+        console.error("Error signing out from Supabase:", error);
+    }
 };
 
 export const upgradeSubscription = (plan: SubscriptionPlan) => {

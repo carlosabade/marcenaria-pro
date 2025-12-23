@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icons } from './Icon';
-import { X } from 'lucide-react';
+import { X, Lock, Check } from 'lucide-react';
 
 interface UpgradePromptProps {
     isOpen: boolean;
@@ -65,7 +64,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
 
                 {/* Icon */}
                 <div className="w-16 h-16 bg-wood-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icons.Lock className="w-8 h-8 text-wood-500" />
+                    <Lock className="w-8 h-8 text-wood-500" />
                 </div>
 
                 {/* Title */}
@@ -99,7 +98,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                 {/* Benefits */}
                 <div className="bg-gradient-to-br from-wood-600/10 to-wood-500/10 rounded-lg p-4 mb-6 border border-wood-600/20">
                     <div className="flex items-start gap-3">
-                        <Icons.Check className="w-5 h-5 text-wood-500 mt-0.5 flex-shrink-0" />
+                        <Check className="w-5 h-5 text-wood-500 mt-0.5 flex-shrink-0" />
                         <div>
                             <p className="text-white font-semibold mb-1">
                                 Desbloqueie com o Plano Pro

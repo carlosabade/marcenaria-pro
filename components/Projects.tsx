@@ -157,7 +157,7 @@ const Projects: React.FC = () => {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!form.clientName || !form.projectType) {
             alert("Preencha o nome do cliente e o tipo de móvel.");
             return;
@@ -167,8 +167,19 @@ const Projects: React.FC = () => {
         const assDays = Number(form.assemblyDays) || 0;
         const totalHours = (prodDays + assDays) * settings.workingHoursPerDay;
 
+        // Check if ID is legacy (timestamp) or new
+        let finalId = editingId;
+        const isLegacyId = editingId !== 'new' && !editingId.includes('-');
+
+        if (isLegacyId) {
+            console.log("🔄 Migrating legacy project ID to UUID...");
+            finalId = crypto.randomUUID();
+        } else if (editingId === 'new') {
+            finalId = crypto.randomUUID();
+        }
+
         const newProject: Project = {
-            id: editingId === 'new' ? crypto.randomUUID() : (editingId as string),
+            id: finalId as string,
             clientName: form.clientName || '',
             clientCpf: form.clientCpf || '',
             clientAddress: form.clientAddress || '',
@@ -198,10 +209,15 @@ const Projects: React.FC = () => {
             customClauses: clauses
         };
 
-        updateProject(newProject);
+        // If migrating, delete the old project first to avoid duplicates
+        if (isLegacyId) {
+            await deleteProject(editingId as string);
+        }
+
+        await updateProject(newProject);
         setProjects(getProjects());
         setIsDirty(false); // Desliga o botão após salvar
-        if (editingId === 'new') setEditingId(newProject.id);
+        setEditingId(newProject.id); // Update to new UUID
     };
 
     const handleUpdateModules = (updatedModules: CabinetModule[]) => {
@@ -378,17 +394,16 @@ const Projects: React.FC = () => {
         if (form.clientName && form.projectType) {
             // ✅ Ensure ID is always a valid UUID (migrate legacy IDs)
             let newId: string;
+            // Check if ID is legacy (legacy = no dashes or short length)
+            const isTargetLegacyId = editingId !== 'new' && (!editingId?.includes('-') || (editingId?.length || 0) < 32);
+
             if (editingId === 'new') {
                 newId = crypto.randomUUID();
+            } else if (isTargetLegacyId) {
+                console.log("🔄 Migrating legacy project ID to UUID:", editingId);
+                newId = crypto.randomUUID();
             } else {
-                // Check if editingId is a valid UUID (has dashes and is long enough)
-                const isValidUUID = (editingId as string).includes('-') && (editingId as string).length >= 32;
-                if (isValidUUID) {
-                    newId = editingId as string;
-                } else {
-                    console.log("🔄 Migrating legacy project ID to UUID:", editingId);
-                    newId = crypto.randomUUID();
-                }
+                newId = editingId as string;
             }
 
             const projectToSave: Project = {
@@ -406,14 +421,19 @@ const Projects: React.FC = () => {
 
             console.log("🔍 [DEBUG] Calling updateProject...");
             try {
+                // If migrating, delete the old legacy project first
+                if (isTargetLegacyId && editingId !== 'new') {
+                    await deleteProject(editingId as string);
+                }
+
                 // ✅ AWAIT the save operation to ensure it completes before generating link
                 await updateProject(projectToSave);
                 console.log("🔍 [DEBUG] updateProject completed successfully");
                 setProjects(getProjects()); // Refresh list
                 setIsDirty(false); // Mark as saved
 
-                // Update editingId if it was 'new'
-                if (editingId === 'new') {
+                // Update editingId if it was 'new' or migrated
+                if (editingId === 'new' || isTargetLegacyId) {
                     setEditingId(newId);
                 }
             } catch (error) {

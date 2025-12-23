@@ -56,18 +56,21 @@ const PublicEstimate: React.FC = () => {
 
                 // 2. Fetch Company Profile (Owner)
                 if (projectData.user_id) {
+                    // Use maybeSingle() to avoid 406 error if RLS blocks access or no profile found
                     const { data: profileData, error: profileError } = await supabase
                         .from('profiles')
                         .select('*')
                         .eq('id', projectData.user_id)
-                        .single();
+                        .maybeSingle();
 
                     console.log("👤 [Debug] Perfil retornado:", profileData, "Erro:", profileError);
 
                     if (profileError) {
                         console.error('Error fetching profile:', profileError);
-                    } else {
+                    } else if (profileData) {
                         setCompany(profileData as CompanyProfile);
+                    } else {
+                        console.warn("⚠️ [Debug] Profile not found or access denied (RLS).");
                     }
                 } else {
                     console.warn("⚠️ [Debug] Project has no user_id");
@@ -108,9 +111,18 @@ const PublicEstimate: React.FC = () => {
 
     if (loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>;
     if (error) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white p-6 text-center"><div><Icons.Shield className="w-12 h-12 mx-auto mb-4 text-red-500" /><h1 className="text-xl font-bold">{error}</h1></div></div>;
-    if (!project || !company) return null;
+    if (!project) return null;
 
-    const primaryColor = company.company_color_primary || '#d97706';
+    // Fallback company profile to prevent blank screen
+    const displayCompany = company || {
+        name: 'Marcenaria',
+        company_name: 'Marcenaria Profissional',
+        company_color_primary: '#d97706',
+        logo: null,
+        company_logo_url: null
+    } as CompanyProfile;
+
+    const primaryColor = displayCompany.company_color_primary || '#d97706';
     const isApproved = project.status === 'approved' || project.status === 'completed';
 
     // Safe parsing of breakdown if strictly typed
@@ -139,15 +151,15 @@ const PublicEstimate: React.FC = () => {
             <header className="bg-white shadow-sm p-4 sticky top-0 z-50">
                 <div className="max-w-3xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        {company.logo || company.company_logo_url ? (
-                            <img src={company.company_logo_url || company.logo} className="h-10 w-10 object-contain" />
+                        {displayCompany.logo || displayCompany.company_logo_url ? (
+                            <img src={displayCompany.company_logo_url || displayCompany.logo} className="h-10 w-10 object-contain" />
                         ) : (
                             <div className="h-10 w-10 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-500">
-                                {company.company_name?.charAt(0) || company.name?.charAt(0)}
+                                {displayCompany.company_name?.charAt(0) || displayCompany.name?.charAt(0)}
                             </div>
                         )}
                         <div>
-                            <h1 className="font-bold text-slate-800 leading-tight">{company.company_name || company.name}</h1>
+                            <h1 className="font-bold text-slate-800 leading-tight">{displayCompany.company_name || displayCompany.name}</h1>
                             <p className="text-[10px] text-slate-500 uppercase tracking-widest">Orçamento Digital</p>
                         </div>
                     </div>
