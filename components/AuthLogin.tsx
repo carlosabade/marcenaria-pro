@@ -6,6 +6,7 @@ import { supabase } from '../services/supabaseClient';
 import { getDeviceId, saveUser, getUser } from '../services/storageService';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
+import { InstallPWA } from './InstallPWA';
 
 interface AuthLoginProps {
     onLogin: (user: UserProfile) => void;
@@ -158,7 +159,10 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative">
+            <div className="absolute top-4 right-4">
+                <InstallPWA />
+            </div>
             <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-md animate-fade-in">
                 <div className="text-center mb-8">
                     <div className="bg-wood-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transform rotate-3">

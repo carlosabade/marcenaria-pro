@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Icons } from './Icon';
 import { getLastSyncDate, logoutUser } from '../services/storageService';
+import { InstallPWA } from './InstallPWA';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -58,6 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallPWA />
           {/* Cloud Status Indicator */}
           <button
             onClick={() => setActiveTab('settings')}
