@@ -143,32 +143,7 @@ const Settings: React.FC = () => {
 
             {activeTab === 'profile' && (
                 <div className="animate-fade-in space-y-6">
-                    {/* DANGER ZONE - TOP VISIBILITY */}
-                    <div className="bg-red-500/10 border-2 border-red-500/50 p-6 rounded-2xl flex items-center justify-between shadow-lg">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-red-500/20 p-3 rounded-full">
-                                <AlertTriangle className="w-8 h-8 text-red-500" />
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-black text-red-500 uppercase tracking-wide">Zona de Perigo</h3>
-                                <p className="text-slate-300 font-medium">Precisa zerar tudo? Apague todos os projetos aqui.</p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={async () => {
-                                if (confirm("ATENÇÃO: Isso apagará TODOS os seus projetos permanentemente.\n\nTem certeza absoluta?")) {
-                                    if (confirm("Última chance: Todos os orçamentos serão perdidos. Confirmar exclusão total?")) {
-                                        await deleteAllProjects();
-                                        alert("Todos os projetos foram apagados.");
-                                        window.location.reload();
-                                    }
-                                }
-                            }}
-                            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-black text-sm uppercase tracking-wider shadow-xl transition-all hover:scale-105 active:scale-95"
-                        >
-                            DELETAR TUDO
-                        </button>
-                    </div>
+
 
                     <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 flex flex-col md:flex-row items-center gap-8 shadow-xl">
                         <div className="bg-gradient-to-br from-wood-600 to-wood-800 h-24 w-24 rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-2xl">
