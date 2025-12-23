@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icons } from './Icon';
+import { X } from 'lucide-react';
 
 interface UpgradePromptProps {
     isOpen: boolean;
@@ -13,7 +14,7 @@ interface UpgradePromptProps {
 
 const FEATURE_MESSAGES = {
     projects: {
-        title: 'Limite de Projetos Atingido',
+        title: 'Limite de Projetos Atingido (Plano Gratuito)',
         description: 'Você atingiu o limite de 3 projetos do plano gratuito.',
         benefit: 'Projetos ilimitados'
     },
@@ -59,7 +60,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                     onClick={onClose}
                     className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
                 >
-                    <Icons.X className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                 </button>
 
                 {/* Icon */}

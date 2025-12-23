@@ -326,6 +326,32 @@ export const updateProject = async (project: Project): Promise<void> => {
     }
 };
 
+export const deleteProject = async (projectId: string): Promise<void> => {
+    // 1. Delete locally
+    const projects = getProjects();
+    const filtered = projects.filter(p => p.id !== projectId);
+    saveProjects(filtered);
+
+    // 2. Delete from cloud (Supabase) if user is logged in
+    const user = getUser();
+    if (user && projectId) {
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .delete()
+                .eq('id', projectId);
+
+            if (error) {
+                console.error('❌ Error deleting project from Supabase:', error);
+            } else {
+                console.log('✅ Project deleted from Supabase');
+            }
+        } catch (err) {
+            console.error('❌ Exception deleting project:', err);
+        }
+    }
+};
+
 export const checkProjectDeadlines = () => {
     const projects = getProjects();
     const today = new Date();

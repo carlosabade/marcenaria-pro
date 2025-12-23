@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Project, AppSettings, MaterialBreakdown, CompanyProfile, ProjectFeedback, CabinetModule, FixedCost, ContractClause, ProjectVideo } from '../types';
-import { getProjects, updateProject, getSettings, getCompanyProfile, calculateProjectFinancials, getUser, incrementDownloadCount, getFixedCosts, calculateHourlyRate, saveCompanyProfile } from '../services/storageService';
+import { getProjects, updateProject, deleteProject, getSettings, getCompanyProfile, calculateProjectFinancials, getUser, incrementDownloadCount, getFixedCosts, calculateHourlyRate, saveCompanyProfile } from '../services/storageService';
 import { Icons } from './Icon';
 import ModuleCalculator from './ModuleCalculator';
 import PaywallModal from './PaywallModal';
@@ -143,9 +143,18 @@ const Projects: React.FC = () => {
             notes: '',
             feedbacks: [],
             modules: [],
-            videos: []
+            videos: [],
+            customClauses: []
         });
         setIsDirty(true);
+    };
+
+    const handleDelete = async (e: React.MouseEvent, projectId: string) => {
+        e.stopPropagation(); // Prevent opening edit mode
+        if (window.confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.')) {
+            await deleteProject(projectId);
+            setProjects(getProjects()); // Refresh list
+        }
     };
 
     const handleSave = () => {
@@ -954,7 +963,16 @@ const Projects: React.FC = () => {
                             <div key={p.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-wood-600 transition-all hover:shadow-2xl group relative cursor-pointer" onClick={() => handleEdit(p)}>
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-3">
-                                        <h3 className="text-xl font-black text-white truncate pr-4">{p.clientName}</h3>
+                                        <div className="flex items-center gap-2 overflow-hidden pr-4 flex-1">
+                                            <h3 className="text-xl font-black text-white truncate">{p.clientName}</h3>
+                                            <button
+                                                onClick={(e) => handleDelete(e, p.id)}
+                                                className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors ml-2"
+                                                title="Excluir Projeto"
+                                            >
+                                                <Icons.Trash className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                         <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${p.status === 'completed' ? 'bg-green-900/50 text-green-400' : p.status === 'active' ? 'bg-blue-900/50 text-blue-400' : 'bg-yellow-900/50 text-yellow-400'}`}>{p.status === 'quote' ? 'Orçamento' : p.status === 'completed' ? 'Finalizado' : 'Produção'}</span>
                                     </div>
                                     <p className="text-wood-500 text-xs font-black uppercase tracking-widest mb-6">{p.projectType}</p>
