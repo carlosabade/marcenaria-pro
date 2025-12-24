@@ -61,7 +61,8 @@ const defaultSettings: AppSettings = {
         hingePrice: 5.00,
         slidePrice: 25.00,
         handlePrice: 15.00
-    }
+    },
+    googleApiKey: ''
 };
 
 export const getDeviceId = (): string => {

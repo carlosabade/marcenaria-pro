@@ -1,12 +1,50 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Zap, Sparkles, Wand2, Eraser, Pencil, Trash2, Download } from 'lucide-react';
 
+import { generateImageFromSketch } from '../services/geminiService';
+import { Icons } from './Icon';
+
+import { getSettings } from '../services/storageService';
+
 const AILab: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [brushSize, setBrushSize] = useState(3);
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
     const [showCanvas, setShowCanvas] = useState(false);
+
+    // AI State
+    const [prompt, setPrompt] = useState('');
+    const [generating, setGenerating] = useState(false);
+    const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleGenerate = async () => {
+        const settings = getSettings();
+        const hasKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY;
+
+        if (!hasKey) {
+            setError("Chave de API não encontrada! Configure em Configurações > IA.");
+            return;
+        }
+
+        if (!prompt) return;
+        setGenerating(true);
+        setGeneratedImage(null);
+        setError(null);
+
+        try {
+            const canvas = canvasRef.current;
+            const sketch = canvas ? canvas.toDataURL() : '';
+            const result = await generateImageFromSketch(sketch, prompt);
+            setGeneratedImage(result);
+        } catch (err) {
+            console.error("Error in AILab:", err);
+            setError((err as Error).message);
+        } finally {
+            setGenerating(false);
+        }
+    };
 
     // Inicializa canvas com fundo branco
     useEffect(() => {
@@ -118,8 +156,8 @@ const AILab: React.FC = () => {
                                 <button
                                     onClick={() => setTool('pen')}
                                     className={`p-2 rounded-lg transition-all ${tool === 'pen'
-                                            ? 'bg-purple-600 text-white shadow-lg'
-                                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                                        ? 'bg-purple-600 text-white shadow-lg'
+                                        : 'bg-slate-800 text-slate-400 hover:text-white'
                                         }`}
                                     title="Lápis"
                                 >
@@ -128,8 +166,8 @@ const AILab: React.FC = () => {
                                 <button
                                     onClick={() => setTool('eraser')}
                                     className={`p-2 rounded-lg transition-all ${tool === 'eraser'
-                                            ? 'bg-slate-700 text-white shadow-lg'
-                                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                                        ? 'bg-slate-700 text-white shadow-lg'
+                                        : 'bg-slate-800 text-slate-400 hover:text-white'
                                         }`}
                                     title="Borracha"
                                 >
@@ -185,23 +223,62 @@ const AILab: React.FC = () => {
                         <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
                             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                                 <Sparkles className="w-5 h-5 text-purple-400" />
-                                Ações
+                                Ações & IA
                             </h3>
-                            <div className="space-y-3">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Descreva o Móvel</label>
+                                    <textarea
+                                        value={prompt}
+                                        onChange={e => setPrompt(e.target.value)}
+                                        placeholder="Ex: Armário de cozinha moderno, mdf branco, puxadores dourados..."
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white h-24 resize-none mb-2 focus:border-purple-500 outline-none"
+                                    />
+                                </div>
+
                                 <button
                                     onClick={downloadSketch}
-                                    className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-blue-500/25"
+                                    className="w-full flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold transition-all text-sm"
                                 >
-                                    <Download className="w-5 h-5" />
+                                    <Download className="w-4 h-4" />
                                     Baixar Rascunho
                                 </button>
+
                                 <button
-                                    disabled
-                                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 cursor-not-allowed text-white py-3 rounded-xl font-bold"
+                                    onClick={handleGenerate}
+                                    disabled={generating || !prompt.trim()}
+                                    className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-purple-500/25 ${generating || !prompt.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
                                 >
-                                    <Wand2 className="w-5 h-5" />
-                                    Gerar com IA (Em Breve)
+                                    {generating ? (
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        <Wand2 className="w-5 h-5" />
+                                    )}
+                                    {generating ? 'Criando...' : 'Gerar Imagem Realista'}
                                 </button>
+
+                                {error && (
+                                    <div className="mt-4 p-3 bg-red-900/50 border border-red-500/50 rounded-xl text-xs text-red-200 animate-fade-in">
+                                        <p className="font-bold mb-1 flex items-center gap-2">
+                                            <Icons.AlertTriangle className="w-4 h-4" /> Erro na Geração
+                                        </p>
+                                        {error}
+                                    </div>
+                                )}
+
+                                {generatedImage && (
+                                    <div className="mt-4 animate-fade-in">
+                                        <p className="text-xs font-bold text-green-400 mb-2 flex items-center gap-1">
+                                            <Icons.Check className="w-3 h-3" /> Imagem Gerada!
+                                        </p>
+                                        <div className="relative group rounded-xl overflow-hidden border-2 border-purple-500/50">
+                                            <img src={generatedImage} className="w-full h-auto" />
+                                            <a href={generatedImage} download="ia-generated.png" className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold transition-opacity">
+                                                <Download className="w-6 h-6" />
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

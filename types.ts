@@ -154,6 +154,7 @@ export interface AppSettings {
   workingHoursPerDay: number;
   hourlyRate: number;
   materialPrices: MaterialPrices;
+  googleApiKey?: string;
 }
 
 export interface CompanyProfile {

@@ -9,7 +9,7 @@ import FixedCosts from './FixedCosts';
 
 const Settings: React.FC = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'profile' | 'company' | 'contract' | 'portal' | 'costs' | 'sync' | 'devices'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'company' | 'contract' | 'ai' | 'portal' | 'costs' | 'sync' | 'devices'>('profile');
     const [profile, setProfile] = useState<CompanyProfile>({
         name: '',
         cnpj: '',
@@ -135,6 +135,7 @@ const Settings: React.FC = () => {
                 <button onClick={() => setActiveTab('profile')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'profile' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Meu Perfil</button>
                 <button onClick={() => setActiveTab('company')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'company' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Dados da Empresa</button>
                 <button onClick={() => setActiveTab('contract')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'contract' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Modelo de Contrato</button>
+                <button onClick={() => setActiveTab('ai')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'ai' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>IA & Integrações</button>
                 <button onClick={() => setActiveTab('portal')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'portal' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Portal do Cliente</button>
                 <button onClick={() => setActiveTab('devices')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'devices' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Dispositivos</button>
                 <button onClick={() => setActiveTab('costs')} className={`pb-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'costs' ? 'text-wood-400 border-b-2 border-wood-500' : 'text-slate-400 hover:text-white'}`}>Custos & Oficina</button>
@@ -279,6 +280,43 @@ const Settings: React.FC = () => {
                     <div className="flex justify-end pt-6 border-t border-slate-700">
                         <button onClick={handleSaveAll} disabled={!isDirty} className={`px-8 py-3 rounded-lg flex items-center gap-2 font-bold transition-all ${isDirty ? 'bg-wood-600 text-white shadow-lg' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
                             <Icons.Save className="w-5 h-5" /> Salvar Modelo
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'ai' && (
+                <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 animate-fade-in space-y-6">
+                    <div className="flex items-start gap-4 p-4 bg-purple-900/20 border border-purple-600/30 rounded-lg">
+                        <Icons.Zap className="w-6 h-6 text-purple-500 mt-1" />
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Inteligência Artificial (IA)</h3>
+                            <p className="text-slate-400 text-sm">Configure sua chave de API para habilitar geração de imagens e assistente de voz.</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Chave de API do Google (Gemini)</label>
+                            <input
+                                value={settings.googleApiKey || ''}
+                                onChange={e => {
+                                    setSettingsState(s => ({ ...s, googleApiKey: e.target.value }));
+                                    setIsDirty(true);
+                                }}
+                                type="password"
+                                placeholder="Cole sua chave AIza..."
+                                className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
+                            />
+                            <p className="text-[10px] text-slate-500 mt-2">
+                                Necessário para o "Laboratório de IA". Obtenha gratuitamente em <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-purple-400 hover:underline">Google AI Studio</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-6 border-t border-slate-700">
+                        <button onClick={handleSaveAll} disabled={!isDirty} className={`px-8 py-3 rounded-lg flex items-center gap-2 font-bold transition-all ${isDirty ? 'bg-wood-600 text-white shadow-lg' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
+                            <Icons.Save className="w-5 h-5" /> Salvar Configurações
                         </button>
                     </div>
                 </div>

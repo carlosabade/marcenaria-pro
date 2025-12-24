@@ -55,22 +55,31 @@ const PublicEstimate: React.FC = () => {
                 setProject(fullProject as Project);
 
                 // 2. Fetch Company Profile (Owner)
+                // 2. Fetch Company Branding (from 'company' table, linked by email)
                 if (projectData.user_id) {
-                    // Use maybeSingle() to avoid 406 error if RLS blocks access or no profile found
-                    const { data: profileData, error: profileError } = await supabase
+                    // First, get the owner's email from profiles
+                    const { data: userData, error: userError } = await supabase
                         .from('profiles')
-                        .select('*')
+                        .select('email, data') // select email to link to company, data as fallback
                         .eq('id', projectData.user_id)
                         .maybeSingle();
 
-                    console.log("👤 [Debug] Perfil retornado:", profileData, "Erro:", profileError);
+                    if (userData?.email) {
+                        // Now fetch the actual company branding config
+                        const { data: companyData, error: companyError } = await supabase
+                            .from('company')
+                            .select('data')
+                            .eq('email', userData.email)
+                            .maybeSingle();
 
-                    if (profileError) {
-                        console.error('Error fetching profile:', profileError);
-                    } else if (profileData) {
-                        setCompany(profileData as CompanyProfile);
-                    } else {
-                        console.warn("⚠️ [Debug] Profile not found or access denied (RLS).");
+                        if (companyData?.data) {
+                            console.log("🏢 [Debug] Branding da Empresa carregado:", companyData.data);
+                            setCompany(companyData.data as CompanyProfile);
+                        } else if (userData.data) {
+                            // Fallback to user profile if company table is empty
+                            console.log("👤 [Debug] Fallback para perfil pessoal:", userData.data);
+                            setCompany(userData.data as CompanyProfile);
+                        }
                     }
                 } else {
                     console.warn("⚠️ [Debug] Project has no user_id");
