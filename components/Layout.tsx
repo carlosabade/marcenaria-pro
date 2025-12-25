@@ -28,8 +28,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'dashboard', label: 'Visão Geral', icon: Icons.Dashboard },
     { id: 'projects', label: 'Projetos', icon: Icons.Hammer },
     { id: 'clients', label: 'Clientes', icon: Icons.Users },
+    { id: 'catalog', label: 'Catálogo MDF', icon: Icons.Book },
     { id: 'ai-studio', label: 'Laboratório IA', icon: Icons.Zap },
     { id: 'settings', label: 'Configurações', icon: Icons.Settings },
+    { id: 'admin', label: 'Administração', icon: Icons.Shield },
   ];
 
   return (
@@ -48,7 +50,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           {navItems.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => item.id === 'admin' ? window.location.href = '/admin' : setActiveTab(item.id)}
               className={`flex items-center gap-2 text-sm font-medium transition-colors ${activeTab === item.id ? 'text-wood-400' : 'text-slate-400 hover:text-white'
                 }`}
             >

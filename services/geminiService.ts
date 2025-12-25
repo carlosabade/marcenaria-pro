@@ -5,7 +5,7 @@ import { getSettings } from "./storageService";
 // Helper to get authenticated client dynamically
 const getAI = () => {
   const settings = getSettings();
-  const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY;
+  const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     throw new Error("Chave de API não configurada. Configure em Ajustes > IA.");
@@ -120,7 +120,7 @@ export const parseVoiceCommand = async (transcript: string): Promise<VoiceComman
 export const generateImageFromSketch = async (sketchBase64: string, prompt: string): Promise<string> => {
   try {
     const settings = getSettings();
-    const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY;
+    const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       throw new Error("Chave de API não encontrada.");

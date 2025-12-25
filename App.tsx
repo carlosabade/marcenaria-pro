@@ -11,6 +11,14 @@ import AILab from './components/AILab';
 import Pricing from './pages/Pricing';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import PublicEstimate from './pages/PublicEstimate';
+import MdfCatalog from './pages/MdfCatalog';
+import AdminLayout from './components/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import ProductList from './pages/admin/ProductList';
+import AdminBrands from './pages/admin/AdminBrands';
+import BlockBuilder from './pages/admin/BlockBuilder';
+import MdfPatternDetails from './pages/MdfPatternDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import { supabase } from './services/supabaseClient';
 import { UserProfile, Appointment, Project } from './types';
@@ -154,6 +162,35 @@ const AppContent = () => {
             <AILab />
           </Layout>
         </ProtectedRoute>
+      } />
+
+      <Route path="/catalog" element={
+        <ProtectedRoute>
+          <Layout activeTab="catalog" setActiveTab={handleNav}>
+            <MdfCatalog />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/catalog/:id" element={
+        <ProtectedRoute>
+          <Layout activeTab="catalog" setActiveTab={handleNav}>
+            <MdfPatternDetails />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      {/* Admin Routes (Standalone) */}
+      <Route path="/admin/*" element={
+        <AdminLayout>
+          <Routes>
+            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/users" element={<AdminUsers />} />
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/brands" element={<AdminBrands />} />
+            <Route path="/builder" element={<BlockBuilder />} />
+          </Routes>
+        </AdminLayout>
       } />
 
       {/* Fallback */}

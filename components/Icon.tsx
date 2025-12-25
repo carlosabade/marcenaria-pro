@@ -47,7 +47,13 @@ import {
   Star,
   Share2,
   Loader,
-  FileImage
+  FileImage,
+  BookOpen,
+  Search,
+  Filter,
+  Heart,
+  AlertTriangle,
+  PenTool
 } from 'lucide-react';
 
 export const Icons = {
@@ -97,5 +103,11 @@ export const Icons = {
   Star,
   Share: Share2,
   Loader,
-  Image: FileImage
+  Image: FileImage,
+  Book: BookOpen,
+  Search,
+  Filter,
+  Heart,
+  AlertTriangle,
+  PenTool
 };
