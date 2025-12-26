@@ -78,7 +78,7 @@ export default defineConfig(({ mode }) => {
             },
             {
               urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
-              handler: 'StaleWhileRevalidate',
+              handler: 'NetworkFirst',
               options: {
                 cacheName: 'supabase-api-cache',
                 expiration: {
@@ -87,7 +87,8 @@ export default defineConfig(({ mode }) => {
                 },
                 cacheableResponse: {
                   statuses: [0, 200]
-                }
+                },
+                networkTimeoutSeconds: 10 // Timeout fallback to cache
               }
             }
           ]

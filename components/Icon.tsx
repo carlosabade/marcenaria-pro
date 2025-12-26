@@ -53,7 +53,8 @@ import {
   Filter,
   Heart,
   AlertTriangle,
-  PenTool
+  PenTool,
+  ArrowLeft
 } from 'lucide-react';
 
 export const Icons = {
@@ -109,5 +110,6 @@ export const Icons = {
   Filter,
   Heart,
   AlertTriangle,
-  PenTool
+  PenTool,
+  ArrowLeft
 };

@@ -479,7 +479,15 @@ export const logoutUser = async () => {
     localStorage.removeItem(KEYS.USER);
     localStorage.removeItem(KEYS.LAST_SYNC);
 
-    // 2. Try to verify logout with Supabase (fire and forget or await safely)
+    // 2. Aggressively clear Supabase Auth tokens from LocalStorage
+    // Supabase stores tokens with a prefix (usually 'sb-' or 'supabase.auth.token')
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-') || key.includes('supabase')) {
+            localStorage.removeItem(key);
+        }
+    });
+
+    // 3. Try to verify logout with Supabase (fire and forget or await safely)
     try {
         await supabase.auth.signOut();
     } catch (error) {

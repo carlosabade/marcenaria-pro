@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Icons } from './Icon';
 
+import { supabase } from '../services/supabaseClient';
+import { logoutUser } from '../services/storageService';
+
 interface AdminLayoutProps {
     children: React.ReactNode;
 }
@@ -11,6 +14,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const handleExit = () => {
+        navigate('/');
+    };
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', path: '/admin', icon: Icons.Dashboard },
@@ -60,11 +67,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                 <div className="p-4 border-t border-slate-700">
                     <button
-                        onClick={() => navigate('/')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-red-900/20 hover:text-red-400 transition-colors ${!sidebarOpen && 'justify-center'}`}
+                        onClick={handleExit}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-wood-900/20 hover:text-wood-400 transition-colors ${!sidebarOpen && 'justify-center'}`}
                     >
-                        <Icons.LogOut className="w-5 h-5" />
-                        {sidebarOpen && <span>Sair do Admin</span>}
+                        <Icons.ArrowLeft className="w-5 h-5" />
+                        {sidebarOpen && <span>Voltar ao App</span>}
                     </button>
                 </div>
             </aside>
@@ -99,11 +106,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     </nav>
                     <div className="p-4 border-t border-slate-700 bg-slate-800">
                         <button
-                            onClick={() => navigate('/')}
-                            className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl bg-red-900/20 text-red-400 hover:bg-red-900/40 transition-colors font-bold"
+                            onClick={handleExit}
+                            className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl bg-wood-900/20 text-wood-400 hover:bg-wood-900/40 transition-colors font-bold"
                         >
-                            <Icons.LogOut className="w-6 h-6" />
-                            Sair do Admin
+                            <Icons.ArrowLeft className="w-6 h-6" />
+                            Voltar ao App
                         </button>
                     </div>
                 </div>

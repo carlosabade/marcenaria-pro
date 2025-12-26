@@ -58,38 +58,32 @@ const MdfCatalog: React.FC = () => {
             setFabricantes(fabData || []);
 
             // --- Debug Verification ---
-            useEffect(() => {
-                const verifyCounts = async () => {
-                    const { data, error } = await supabase
-                        .from('materiais_mdf')
-                        .select('fabricante');
 
-                    if (data) {
-                        const counts: { [key: string]: number } = {};
-                        data.forEach((p: any) => {
-                            counts[p.fabricante] = (counts[p.fabricante] || 0) + 1;
-                        });
-                        console.log('=== VERIFICAÇÃO DE POPULAÇÃO DO CATÁLOGO ===');
-                        console.table(counts);
-                        console.log('Total:', data.length);
-                    }
-                };
-                verifyCounts();
-            }, []);
 
             // --- Fetch Data ---
             // 2. Fetch Patterns (All for now, or could optimize to fetch on demand)
             // For a better UX, we'll fetch all and filter client side for this scale
+            // 2. Fetch Patterns (Remove filter to debug visibility)
             const { data: patData, error: patError } = await supabase
                 .from('padroes_mdf')
-                .select(`
-          *,
-          fabricante:fabricantes_mdf(id, nome, logo_url)
-        `)
-                .eq('disponivel', true);
+                .select('*');
 
             if (patError) throw patError;
-            setPadroes(patData as PadraoMDF[] || []);
+
+            // Manual Join with loose equality for ID matching
+            const formattedPatterns = (patData || []).map((p: any) => {
+                // Try to find manufacturer with loose equality (handle string/number mismatch)
+                const fab = fabData?.find(f => f.id == p.fabricante_id);
+                return {
+                    ...p,
+                    fabricante: fab || { id: 0, nome: 'Desconhecido', logo_url: '' }
+                };
+            });
+
+            console.log('Patterns fetched:', (patData || []).length);
+            console.log('Formatted:', formattedPatterns.length);
+
+            setPadroes(formattedPatterns as PadraoMDF[]);
 
         } catch (error) {
             console.error('Erro ao buscar dados:', error);
@@ -153,8 +147,28 @@ const MdfCatalog: React.FC = () => {
         return 'from-slate-800 to-slate-900';
     };
 
+    // URL Debug Trigger
+    const [showDebug, setShowDebug] = useState(false);
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('debug') === 'true') setShowDebug(true);
+    }, []);
+
     return (
         <div className="space-y-6 animate-fade-in">
+            {/* HIDDEN DEBUG OVERLAY */}
+            {showDebug && (
+                <div className="bg-black/90 text-green-400 p-4 rounded mb-4 font-mono text-xs overflow-auto max-h-60 border border-green-900 shadow-2xl z-50 relative">
+                    <p className="font-bold border-b border-green-800 mb-2">🕵️‍♂️ DEBUG MODE ACTIVATED</p>
+                    <p>Fabricantes encontrados: {fabricantes.length}</p>
+                    <p>Padrões encontrados (Total Raw): {padroes.length}</p>
+                    <p>Fabricante Selecionado: {selectedFabricante?.nome || 'Nenhum'}</p>
+                    <p>---</p>
+                    <p>Exemplo Raw [0]:</p>
+                    <pre>{JSON.stringify(padroes[0] || 'N/A', null, 2)}</pre>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>

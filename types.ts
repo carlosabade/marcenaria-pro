@@ -195,4 +195,5 @@ export interface UserProfile {
   subscriptionDate?: string;
   downloadCount: number;
   devices: DeviceInfo[];
+  role?: 'admin' | 'user';
 }

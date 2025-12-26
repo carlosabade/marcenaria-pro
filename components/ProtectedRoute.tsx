@@ -8,26 +8,16 @@ import { supabase } from '../services/supabaseClient';
 interface ProtectedRouteProps {
     children: React.ReactNode;
     requireSubscription?: boolean;
+    user: any; // Using any or UserProfile to avoid circular types if not easy to import
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireSubscription = false }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireSubscription = false, user }) => {
     const { isActive, loading: subLoading } = useSubscription();
-    const [session, setSession] = React.useState<any>(null);
-    const [authLoading, setAuthLoading] = React.useState(true);
 
-    React.useEffect(() => {
-        // Assuming 'supabase' is imported or available in this scope
-        // For example: import { supabase } from '../utils/supabaseClient';
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setAuthLoading(false);
-        });
-    }, []);
+    // If we are here, App.tsx has already determined 'loading' is false.
+    // So we just check 'user'.
 
-    // We might also want to check for auth session here if not already handled globally.
-    // For now, assuming App's auth check covers basic login.
-
-    if (authLoading || subLoading) {
+    if (subLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-900">
                 <Loader2 className="w-10 h-10 text-wood-500 animate-spin" />
@@ -35,7 +25,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireSubscr
         );
     }
 
-    if (!session) {
+    if (!user) {
         return <Navigate to="/login" replace />;
     }
 

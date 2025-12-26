@@ -18,8 +18,10 @@ import AdminUsers from './pages/admin/AdminUsers';
 import ProductList from './pages/admin/ProductList';
 import AdminBrands from './pages/admin/AdminBrands';
 import BlockBuilder from './pages/admin/BlockBuilder';
+import AdminSettings from './pages/admin/AdminSettings';
 import MdfPatternDetails from './pages/MdfPatternDetails';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import { supabase } from './services/supabaseClient';
 import { UserProfile, Appointment, Project } from './types';
 import { getUser, logoutUser, saveUser, checkProjectDeadlines } from './services/storageService';
@@ -35,60 +37,49 @@ const AppContent = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const localUser = getUser();
-        if (localUser) {
-          setUser(localUser);
-          setLoading(false);
-        }
-
+        // 1. Check Supabase Session (Source of Truth)
         const { data: { session }, error } = await supabase.auth.getSession();
 
+        if (error) throw error;
+
         if (session?.user) {
-          if (!localUser || localUser.id !== session.user.id) {
-            const { data } = await supabase.from('profiles').select('data').eq('email', session.user.email).maybeSingle();
-            if (data?.data) {
-              const profile = data.data as UserProfile;
-              saveUser(profile);
-              setUser(profile);
-            }
+          // Session valid! Sync/Get Profile
+          const { data } = await supabase.from('profiles').select('data').eq('email', session.user.email).maybeSingle();
+          if (data?.data) {
+            const profile = data.data as UserProfile;
+            saveUser(profile);
+            setUser(profile);
+          } else {
+            // Fallback: If we have a session but no profile, try local storage or bare minimum
+            const local = getUser();
+            if (local && local.email === session.user.email) setUser(local);
+          }
+        } else {
+          // No session found.
+          console.log("No active session found.");
+          // If we had a local user, it's stale. Clear it.
+          if (getUser()) {
+            console.warn("Clearing stale local user.");
+            logoutUser();
+            setUser(null);
           }
         }
-
-        // Always stop loading after checks
-        setLoading(false);
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_OUT') {
-            setUser(null);
-            logoutUser();
-            navigate('/');
-          } else if (event === 'SIGNED_IN' && session?.user) {
-            const { data } = await supabase.from('profiles').select('data').eq('email', session.user.email).maybeSingle();
-            if (data?.data) {
-              const profile = data.data as UserProfile;
-              saveUser(profile);
-              setUser(profile);
-            }
-          }
-        });
-
-        return () => subscription.unsubscribe();
-
-      } catch (err) {
+      } catch (err: any) {
         console.error("Auth init error:", err);
+        // CRITICAL: If Refresh Token is invalid, we MUST clear local state to prevent loops
+        if (err.message?.includes("Refresh Token") || err.message?.includes("Invalid")) {
+          console.error("Critical Auth Error - Force Logout");
+          logoutUser();
+          setUser(null);
+        }
+      } finally {
         setLoading(false);
       }
     };
 
     initAuth();
 
-    // Notification logic
-    if ("Notification" in window) {
-      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission();
-      }
-    }
-
+    // Background checks
     const intervalId = setInterval(() => {
       if (getUser()) {
         checkAppointments();
@@ -97,15 +88,40 @@ const AppContent = () => {
     }, 60000);
 
     return () => clearInterval(intervalId);
-  }, [navigate]);
+  }, []); // Run ONCE on mount only. No navigate dependency.
+
+  // Failsafe: if loading takes too long, offer manual reset
+  const [showReset, setShowReset] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowReset(true), 5000); // 5s timeout
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleHardReset = async () => {
+    localStorage.clear();
+    try { await supabase.auth.signOut(); } catch { }
+    window.location.href = '/login';
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950">
-        <div className="text-center">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 p-4">
+        <div className="text-center mb-6">
           <Loader2 className="w-16 h-16 text-wood-600 animate-spin mx-auto mb-4" />
           <p className="text-wood-400 font-medium">Carregando oficina...</p>
         </div>
+
+        {showReset && (
+          <div className="animate-fade-in text-center">
+            <p className="text-red-400 text-sm mb-3">Parece que demorou demais?</p>
+            <button
+              onClick={handleHardReset}
+              className="bg-red-900/50 hover:bg-red-800 text-red-200 px-6 py-2 rounded-full border border-red-800 transition-colors text-sm font-bold"
+            >
+              Forçar Reinício (Limpar Cache)
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -125,7 +141,7 @@ const AppContent = () => {
 
       {/* Routes wrapped in Layout */}
       <Route path="/" element={
-        <ProtectedRoute>
+        <ProtectedRoute user={user}>
           <Layout activeTab="dashboard" setActiveTab={handleNav}>
             <Dashboard user={user as UserProfile} />
           </Layout>
@@ -133,7 +149,7 @@ const AppContent = () => {
       } />
 
       <Route path="/projects" element={
-        <ProtectedRoute>
+        <ProtectedRoute user={user}>
           <Layout activeTab="projects" setActiveTab={handleNav}>
             <Projects />
           </Layout>
@@ -141,7 +157,7 @@ const AppContent = () => {
       } />
 
       <Route path="/clients" element={
-        <ProtectedRoute>
+        <ProtectedRoute user={user}>
           <Layout activeTab="clients" setActiveTab={handleNav}>
             <Clients />
           </Layout>
@@ -149,7 +165,7 @@ const AppContent = () => {
       } />
 
       <Route path="/settings" element={
-        <ProtectedRoute>
+        <ProtectedRoute user={user}>
           <Layout activeTab="settings" setActiveTab={handleNav}>
             <Settings />
           </Layout>
@@ -157,7 +173,7 @@ const AppContent = () => {
       } />
 
       <Route path="/ai-studio" element={
-        <ProtectedRoute>
+        <ProtectedRoute user={user}>
           <Layout activeTab="ai-studio" setActiveTab={handleNav}>
             <AILab />
           </Layout>
@@ -165,7 +181,7 @@ const AppContent = () => {
       } />
 
       <Route path="/catalog" element={
-        <ProtectedRoute>
+        <ProtectedRoute user={user}>
           <Layout activeTab="catalog" setActiveTab={handleNav}>
             <MdfCatalog />
           </Layout>
@@ -173,7 +189,7 @@ const AppContent = () => {
       } />
 
       <Route path="/catalog/:id" element={
-        <ProtectedRoute>
+        <ProtectedRoute user={user}>
           <Layout activeTab="catalog" setActiveTab={handleNav}>
             <MdfPatternDetails />
           </Layout>
@@ -182,15 +198,18 @@ const AppContent = () => {
 
       {/* Admin Routes (Standalone) */}
       <Route path="/admin/*" element={
-        <AdminLayout>
-          <Routes>
-            <Route path="/" element={<AdminDashboard />} />
-            <Route path="/users" element={<AdminUsers />} />
-            <Route path="/products" element={<ProductList />} />
-            <Route path="/brands" element={<AdminBrands />} />
-            <Route path="/builder" element={<BlockBuilder />} />
-          </Routes>
-        </AdminLayout>
+        <ProtectedAdminRoute>
+          <AdminLayout>
+            <Routes>
+              <Route path="/" element={<AdminDashboard />} />
+              <Route path="/users" element={<AdminUsers />} />
+              <Route path="/products" element={<ProductList />} />
+              <Route path="/brands" element={<AdminBrands />} />
+              <Route path="/builder" element={<BlockBuilder />} />
+              <Route path="/settings" element={<AdminSettings />} />
+            </Routes>
+          </AdminLayout>
+        </ProtectedAdminRoute>
       } />
 
       {/* Fallback */}
