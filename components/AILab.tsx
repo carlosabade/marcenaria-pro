@@ -1024,7 +1024,7 @@ const AILab: React.FC = () => {
 
 
     return (
-        <div className="flex h-screen bg-white">
+        <div className="flex h-full bg-white">
             {/* Sidebar Library */}
             <div className="w-80 border-r border-slate-200 flex flex-col bg-slate-50">
                 <div className="p-4 border-b border-slate-200 bg-white">
@@ -1059,8 +1059,8 @@ const AILab: React.FC = () => {
                             {expandedCategory === catKey && (
                                 <div className="p-2 grid grid-cols-2 gap-2">
                                     {Object.entries(catData.blocks)
-                                        .filter(([key, block]) => block.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                                        .map(([key, block]) => (
+                                        .filter(([key, block]: [string, any]) => block.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map(([key, block]: [string, any]) => (
                                             <button
                                                 key={key}
                                                 onClick={() => addBlock(catKey, key)}

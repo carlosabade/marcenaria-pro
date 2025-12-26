@@ -26,6 +26,23 @@ export default defineConfig(({ mode }) => {
           background_color: '#0f172a',
           display: 'standalone',
           orientation: 'portrait',
+          categories: ['business', 'productivity', 'utilities'],
+          screenshots: [
+            {
+              src: 'screenshot-mobile.png',
+              sizes: '375x667',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'Painel Mobile'
+            },
+            {
+              src: 'screenshot-desktop.png',
+              sizes: '1280x800',
+              type: 'image/png',
+              form_factor: 'wide',
+              label: 'Dashboard Desktop'
+            }
+          ],
           icons: [
             {
               src: 'pwa-192x192.png',

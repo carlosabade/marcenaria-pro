@@ -62,7 +62,8 @@ const defaultSettings: AppSettings = {
         slidePrice: 25.00,
         handlePrice: 15.00
     },
-    googleApiKey: ''
+    googleApiKey: '',
+    style: 'Moderno'
 };
 
 export const getDeviceId = (): string => {

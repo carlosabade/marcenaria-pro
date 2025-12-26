@@ -133,8 +133,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         </div>
       )}
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar relative z-0">
-        <div className="max-w-7xl mx-auto">
+      <main className={`flex-1 relative z-0 no-scrollbar ${activeTab === 'ai-studio' ? 'p-0 overflow-hidden' : 'p-4 md:p-8 overflow-y-auto'}`}>
+        <div className={activeTab === 'ai-studio' ? 'h-full w-full' : 'max-w-7xl mx-auto'}>
           {children}
         </div>
       </main>

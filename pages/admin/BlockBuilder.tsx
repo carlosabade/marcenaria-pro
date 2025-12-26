@@ -687,7 +687,7 @@ const BlockBuilder: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-slate-100 font-sans text-slate-800 overflow-hidden">
+        <div className="flex flex-col h-full bg-slate-100 font-sans text-slate-800 overflow-hidden">
             {/* Header */}
             <div className="bg-slate-900 text-white px-6 py-3 flex justify-between items-center shadow-md z-20">
                 <div className="flex items-center gap-8">
