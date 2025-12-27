@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { generateImageFromSketch } from '../services/geminiService';
 
 import { getSettings } from '../services/storageService';
-import { Wand2, Download, Save, ZoomIn, ZoomOut, Move, MousePointer2, Ruler, Square, Type, Database, Layout, ChevronDown, ChevronRight } from 'lucide-react';
+import { Wand2, Download, Save, ZoomIn, ZoomOut, Move, MousePointer2, Ruler, Square, Type, Database, Layout, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
 // ============================================
@@ -1293,11 +1293,26 @@ const AILab: React.FC = () => {
 
             {/* Properties Panel (Right) */}
             {selectedBlockId && (
-                <div className="w-64 border-l border-slate-200 bg-white p-4 overflow-y-auto">
-                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <Type className="w-4 h-4 text-indigo-600" />
-                        Propriedades
-                    </h3>
+                <div className={`
+                    fixed bottom-0 left-0 right-0 md:relative md:w-64 md:inset-auto z-40 
+                    bg-white border-t md:border-t-0 md:border-l border-slate-200 
+                    p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] md:shadow-none 
+                    animate-in slide-in-from-bottom duration-200
+                    max-h-[50vh] md:max-h-full overflow-y-auto
+                `}>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                            <Type className="w-4 h-4 text-indigo-600" />
+                            Propriedades
+                        </h3>
+                        {/* Mobile Close Button */}
+                        <button
+                            onClick={() => setSelectedBlockId(null)}
+                            className="md:hidden p-1 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
 
                     <div className="space-y-4">
                         <div>
