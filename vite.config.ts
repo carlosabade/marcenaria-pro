@@ -31,14 +31,14 @@ export default defineConfig(({ mode }) => {
           screenshots: [
             {
               src: '/screenshot-mobile.png',
-              sizes: '375x667',
+              sizes: '625x718',
               type: 'image/png',
               form_factor: 'narrow',
               label: 'Painel Mobile'
             },
             {
               src: '/screenshot-desktop.png',
-              sizes: '1280x800',
+              sizes: '1024x1024',
               type: 'image/png',
               form_factor: 'wide',
               label: 'Dashboard Desktop'
@@ -47,17 +47,17 @@ export default defineConfig(({ mode }) => {
           icons: [
             {
               src: '/pwa-192x192.png',
-              sizes: '192x192',
+              sizes: '1024x1024',
               type: 'image/png'
             },
             {
               src: '/pwa-512x512.png',
-              sizes: '512x512',
+              sizes: '1024x1024',
               type: 'image/png'
             },
             {
               src: '/pwa-512x512.png',
-              sizes: '512x512',
+              sizes: '1024x1024',
               type: 'image/png',
               purpose: 'any maskable'
             }
