@@ -2,6 +2,7 @@
     "name": "Marcenaria Pro",
     "short_name": "MarcPro",
     "description": "Sistema profissional de gestão para marcenarias",
+    "id": "/",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#0f172a",
@@ -9,14 +10,18 @@
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
+            "src": "/pwa-192x192.png",
+            "sizes": "1024x1024",
+            "type": "image/png"
         },
         {
-            "src": "/icon-512.png",
-            "sizes": "512x512",
+            "src": "/pwa-512x512.png",
+            "sizes": "1024x1024",
+            "type": "image/png"
+        },
+        {
+            "src": "/pwa-512x512.png",
+            "sizes": "1024x1024",
             "type": "image/png",
             "purpose": "any maskable"
         }
@@ -28,9 +33,17 @@
     "screenshots": [
         {
             "src": "/screenshot-mobile.png",
-            "sizes": "375x667",
+            "sizes": "625x718",
             "type": "image/png",
-            "form_factor": "narrow"
+            "form_factor": "narrow",
+            "label": "Painel Mobile"
+        },
+        {
+            "src": "/screenshot-desktop.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Dashboard Desktop"
         }
     ]
 }
