@@ -1042,6 +1042,80 @@ const AILab: React.FC = () => {
     };
 
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+        const touch = e.touches[0];
+        const rect = canvasRef.current!.getBoundingClientRect();
+        const startX = touch.clientX - rect.left;
+        const startY = touch.clientY - rect.top;
+
+        if (activeTool === 'pan') {
+            setIsDragging(true);
+            setDragStart({ x: startX, y: startY });
+            setLastPan(pan);
+            return;
+        }
+
+        const worldX = (startX - pan.x) / zoom;
+        const worldY = (startY - pan.y) / zoom;
+
+        let hitId: string | null = null;
+        for (let i = placedBlocks.length - 1; i >= 0; i--) {
+            const block = placedBlocks[i];
+            const libCat = blockLibrary[block.category];
+            if (!libCat) continue;
+            const def = libCat.blocks[block.type];
+            if (!def) continue;
+
+            const w = def.width * scale;
+            const h = def.height * scale;
+
+            if (worldX >= block.x && worldX <= block.x + w &&
+                worldY >= block.y && worldY <= block.y + h) {
+                hitId = block.id;
+                break;
+            }
+        }
+
+        if (hitId) {
+            const updated = placedBlocks.map(b => ({ ...b, selected: b.id === hitId }));
+            setPlacedBlocks(updated);
+            setIsDragging(true);
+            setDragStart({ x: worldX, y: worldY });
+        } else {
+            setPlacedBlocks(placedBlocks.map(b => ({ ...b, selected: false })));
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!isDragging) return;
+        // Prevent scrolling while dragging on canvas
+        // e.preventDefault(); // Note: might need passive implementation in real DOM to work fully
+
+        const touch = e.touches[0];
+        const rect = canvasRef.current!.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+
+        if (activeTool === 'pan') {
+            const dx = x - dragStart.x;
+            const dy = y - dragStart.y;
+            setPan({ x: lastPan.x + dx, y: lastPan.y + dy });
+        } else {
+            const worldX = (x - pan.x) / zoom;
+            const worldY = (y - pan.y) / zoom;
+            const dx = worldX - dragStart.x;
+            const dy = worldY - dragStart.y;
+
+            setPlacedBlocks(prev => prev.map(b => {
+                if (b.selected) {
+                    return { ...b, x: b.x + dx, y: b.y + dy };
+                }
+                return b;
+            }));
+            setDragStart({ x: worldX, y: worldY });
+        }
+    };
+
     // Mobile Sidebar State
     const [isMobileLibraryOpen, setIsMobileLibraryOpen] = useState(false);
 
@@ -1201,7 +1275,7 @@ const AILab: React.FC = () => {
                 {/* Canvas */}
                 <div
                     ref={containerRef}
-                    className={`flex-1 bg-[#f0f0f0] overflow-hidden ${activeTool === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+                    className={`flex-1 bg-[#f0f0f0] overflow-hidden touch-none ${activeTool === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
                 >
                     <canvas
                         ref={canvasRef}
@@ -1209,6 +1283,9 @@ const AILab: React.FC = () => {
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleMouseUp}
                         onWheel={handleWheel}
                     />
                 </div>
