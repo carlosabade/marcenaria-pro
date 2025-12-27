@@ -61,45 +61,52 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         </nav>
 
         <div className="flex items-center gap-2">
-          <InstallPWA />
-          {/* Cloud Status Indicator */}
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`p-2 rounded-full transition-all flex items-center gap-1 group relative`}
-            title={syncStatus === 'current' ? 'Backup em dia' : 'Backup necessário'}
-          >
-            <Icons.Box className={`w-5 h-5 ${syncStatus === 'current' ? 'text-green-500' :
-              syncStatus === 'outdated' ? 'text-orange-500 animate-pulse' :
-                'text-slate-500'
-              }`} />
-            <div className={`w-2 h-2 rounded-full absolute top-1 right-1 border border-slate-800 ${syncStatus === 'current' ? 'bg-green-500' :
-              syncStatus === 'outdated' ? 'bg-orange-500' :
-                'bg-slate-600'
-              }`}></div>
-          </button>
+          {/* Mobile-optimized PWA Install - Logic inside component should handle responsiveness or we assume it adapts */}
+          <div className="scale-75 origin-right md:scale-100">
+            <InstallPWA />
+          </div>
+
+          {/* Desktop Only Icons */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* Cloud Status Indicator */}
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`p-2 rounded-full transition-all flex items-center gap-1 group relative`}
+              title={syncStatus === 'current' ? 'Backup em dia' : 'Backup necessário'}
+            >
+              <Icons.Box className={`w-5 h-5 ${syncStatus === 'current' ? 'text-green-500' :
+                syncStatus === 'outdated' ? 'text-orange-500 animate-pulse' :
+                  'text-slate-500'
+                }`} />
+              <div className={`w-2 h-2 rounded-full absolute top-1 right-1 border border-slate-800 ${syncStatus === 'current' ? 'bg-green-500' :
+                syncStatus === 'outdated' ? 'bg-orange-500' :
+                  'bg-slate-600'
+                }`}></div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`p-2 rounded-full transition-colors ${activeTab === 'settings' ? 'bg-wood-900/50 text-wood-400' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}
+              title="Meu Perfil"
+            >
+              <Icons.User className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => {
+                if (confirm("Tem certeza que deseja sair?")) {
+                  logoutUser().then(() => window.location.reload());
+                }
+              }}
+              className="text-slate-300 p-2 hover:bg-red-900/20 hover:text-red-400 rounded-full transition-colors"
+              title="Sair do Sistema"
+            >
+              <Icons.LogOut className="w-5 h-5" />
+            </button>
+          </div>
 
           <button
-            onClick={() => setActiveTab('settings')}
-            className={`p-2 rounded-full transition-colors ${activeTab === 'settings' ? 'bg-wood-900/50 text-wood-400' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}
-            title="Meu Perfil"
-          >
-            <Icons.User className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() => {
-              if (confirm("Tem certeza que deseja sair?")) {
-                logoutUser().then(() => window.location.reload());
-              }
-            }}
-            className="text-slate-300 p-2 hover:bg-red-900/20 hover:text-red-400 rounded-full transition-colors"
-            title="Sair do Sistema"
-          >
-            <Icons.LogOut className="w-5 h-5" />
-          </button>
-
-          <button
-            className="md:hidden text-slate-300 p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="md:hidden text-slate-300 p-2 hover:bg-slate-700 rounded-lg transition-colors ml-1"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <Icons.Close /> : <Icons.Menu />}
@@ -108,7 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-16 bg-slate-900 z-40 p-4 md:hidden animate-fade-in overflow-y-auto">
+        <div className="fixed inset-0 top-16 bg-slate-900 z-40 p-4 md:hidden animate-fade-in overflow-y-auto pb-20">
           <div className="flex flex-col gap-3">
             {navItems.map(item => (
               <button
@@ -129,6 +136,21 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                 {activeTab === item.id && <Icons.ChevronRight className="w-5 h-5 ml-auto opacity-50" />}
               </button>
             ))}
+
+            {/* Mobile Logout Button */}
+            <button
+              onClick={() => {
+                if (confirm("Tem certeza que deseja sair?")) {
+                  logoutUser().then(() => window.location.reload());
+                }
+              }}
+              className="flex items-center gap-4 p-4 rounded-xl transition-all border bg-red-900/10 border-red-900/30 text-red-400 hover:bg-red-900/20 mt-4"
+            >
+              <div className="p-2 rounded-lg bg-red-900/20 text-red-400">
+                <Icons.LogOut className="w-6 h-6" />
+              </div>
+              <span className="font-bold text-lg">Sair do Sistema</span>
+            </button>
           </div>
         </div>
       )}

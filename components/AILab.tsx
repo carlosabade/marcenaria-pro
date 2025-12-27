@@ -1023,19 +1023,35 @@ const AILab: React.FC = () => {
     };
 
 
+    // Mobile Sidebar State
+    const [isMobileLibraryOpen, setIsMobileLibraryOpen] = useState(false);
+
     return (
-        <div className="flex h-full bg-white">
-            {/* Sidebar Library */}
-            <div className="w-80 border-r border-slate-200 flex flex-col bg-slate-50">
-                <div className="p-4 border-b border-slate-200 bg-white">
+        <div className="flex h-full bg-white relative overflow-hidden">
+            {/* Sidebar Library - Responsive Drawer */}
+            <div className={`
+                fixed inset-y-0 left-0 z-30 w-80 bg-slate-50 border-r border-slate-200 flex flex-col transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none
+                ${isMobileLibraryOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:relative md:flex
+            `}>
+                <div className="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
                     <h2 className="font-bold text-slate-800 flex items-center gap-2">
                         <Layout className="w-5 h-5 text-indigo-600" />
                         Biblioteca
                     </h2>
+                    {/* Close Button Mobile */}
+                    <button
+                        onClick={() => setIsMobileLibraryOpen(false)}
+                        className="md:hidden p-1 hover:bg-slate-100 rounded text-slate-500"
+                    >
+                        &times;
+                    </button>
+                </div>
+
+                <div className="p-4 border-b border-slate-200 bg-white">
                     <input
                         type="text"
                         placeholder="Buscar módulo..."
-                        className="mt-2 w-full px-3 py-1.5 bg-slate-100 border-none rounded text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-1.5 bg-slate-100 border-none rounded text-sm focus:ring-2 focus:ring-indigo-500"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -1063,7 +1079,10 @@ const AILab: React.FC = () => {
                                         .map(([key, block]: [string, any]) => (
                                             <button
                                                 key={key}
-                                                onClick={() => addBlock(catKey, key)}
+                                                onClick={() => {
+                                                    addBlock(catKey, key);
+                                                    setIsMobileLibraryOpen(false); // Close on selection (mobile UX)
+                                                }}
                                                 className="flex flex-col items-center justify-center p-2 border border-slate-100 rounded hover:border-indigo-500 hover:shadow-sm bg-white transition-all h-24"
                                             >
                                                 {/* Preview Icon - Simplified representation */}
@@ -1091,11 +1110,28 @@ const AILab: React.FC = () => {
                 </div>
             </div>
 
+            {/* Overlay for mobile library */}
+            {isMobileLibraryOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-20 md:hidden animate-fade-in"
+                    onClick={() => setIsMobileLibraryOpen(false)}
+                />
+            )}
+
             {/* Main Area */}
-            <div className="flex-1 flex flex-col relative overflow-hidden">
+            <div className="flex-1 flex flex-col relative overflow-hidden h-full">
                 {/* Toolbar */}
-                <div className="absolute top-4 left-4 right-4 z-10 flex justify-between pointer-events-none">
+                <div className="absolute top-4 left-4 right-4 z-10 flex justify-between pointer-events-none flex-wrap gap-2">
                     <div className="bg-white p-1 rounded-lg shadow-md border border-slate-200 flex gap-1 pointer-events-auto">
+                        {/* Mobile Library Toggle */}
+                        <button
+                            onClick={() => setIsMobileLibraryOpen(true)}
+                            className="md:hidden p-2 rounded hover:bg-slate-100 text-slate-600 border-r border-slate-200 mr-1"
+                            title="Abrir Biblioteca"
+                        >
+                            <Layout className="w-5 h-5 text-indigo-600" />
+                        </button>
+
                         <button
                             onClick={() => setActiveTool('select')}
                             className={`p-2 rounded ${activeTool === 'select' ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-slate-100 text-slate-600'}`}
@@ -1123,18 +1159,19 @@ const AILab: React.FC = () => {
                         <button
                             onClick={generateImage}
                             disabled={generating}
-                            className={`flex items-center gap-2 px-4 py-2 rounded font-semibold text-white transition-all shadow-sm
+                            className={`flex items-center gap-2 px-3 py-2 rounded font-semibold text-white transition-all shadow-sm text-sm
                                 ${generating ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow'}`}
                         >
                             {generating ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Gerando...
+                                    <span className="hidden sm:inline">Gerando...</span>
                                 </>
                             ) : (
                                 <>
                                     <Wand2 className="w-4 h-4" />
-                                    Gerar Imagem Realista
+                                    <span className="hidden sm:inline">Gerar Imagem</span>
+                                    <span className="sm:hidden">Gerar</span>
                                 </>
                             )}
                         </button>
