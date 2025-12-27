@@ -295,23 +295,84 @@ const Settings: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
+                        {/* Provider Selector */}
                         <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Chave de API do Google (Gemini)</label>
-                            <input
-                                value={settings.googleApiKey || ''}
-                                onChange={e => {
-                                    setSettingsState(s => ({ ...s, googleApiKey: e.target.value }));
-                                    setIsDirty(true);
-                                }}
-                                type="password"
-                                placeholder="Cole sua chave AIza..."
-                                className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
-                            />
-                            <p className="text-[10px] text-slate-500 mt-2">
-                                Necessário para o "Laboratório de IA". Obtenha gratuitamente em <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-purple-400 hover:underline">Google AI Studio</a>.
-                            </p>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Provedor de IA (Gerador de Imagens)</label>
+                            <div className="flex gap-4">
+                                <label className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${settings.aiProvider === 'gemini' ? 'bg-purple-900/20 border-purple-500' : 'bg-slate-900 border-slate-700 hover:border-slate-500'}`}>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <input
+                                            type="radio"
+                                            name="aiProvider"
+                                            value="gemini"
+                                            checked={settings.aiProvider === 'gemini' || !settings.aiProvider} // Default to Gemini
+                                            onChange={() => {
+                                                setSettingsState(s => ({ ...s, aiProvider: 'gemini' }));
+                                                setIsDirty(true);
+                                            }}
+                                            className="text-purple-500 focus:ring-purple-500"
+                                        />
+                                        <span className="font-bold text-white">Google Gemini</span>
+                                    </div>
+                                    <p className="text-xs text-slate-400">Gratuito e rápido. Gera vetores SVG técnicos.</p>
+                                </label>
+
+                                <label className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${settings.aiProvider === 'openai' ? 'bg-green-900/20 border-green-500' : 'bg-slate-900 border-slate-700 hover:border-slate-500'}`}>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <input
+                                            type="radio"
+                                            name="aiProvider"
+                                            value="openai"
+                                            checked={settings.aiProvider === 'openai'}
+                                            onChange={() => {
+                                                setSettingsState(s => ({ ...s, aiProvider: 'openai' }));
+                                                setIsDirty(true);
+                                            }}
+                                            className="text-green-500 focus:ring-green-500"
+                                        />
+                                        <span className="font-bold text-white">OpenAI (GPT-5)</span>
+                                    </div>
+                                    <p className="text-xs text-slate-400">Pago. Qualidade extrema com GPT-5.2.</p>
+                                </label>
+                            </div>
                         </div>
+
+                        {settings.aiProvider === 'gemini' || !settings.aiProvider ? (
+                            <div className="animate-fade-in">
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Chave de API do Google (Gemini)</label>
+                                <input
+                                    value={settings.googleApiKey || ''}
+                                    onChange={e => {
+                                        setSettingsState(s => ({ ...s, googleApiKey: e.target.value }));
+                                        setIsDirty(true);
+                                    }}
+                                    type="password"
+                                    placeholder="Cole sua chave AIza..."
+                                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-purple-500 font-mono text-sm"
+                                />
+                                <p className="text-[10px] text-slate-500 mt-2">
+                                    Necessário para o "Laboratório de IA". Obtenha gratuitamente em <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-purple-400 hover:underline">Google AI Studio</a>.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="animate-fade-in">
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Chave de API da OpenAI</label>
+                                <input
+                                    value={settings.openAIApiKey || ''}
+                                    onChange={e => {
+                                        setSettingsState(s => ({ ...s, openAIApiKey: e.target.value }));
+                                        setIsDirty(true);
+                                    }}
+                                    type="password"
+                                    placeholder="sk-..."
+                                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-green-500 font-mono text-sm"
+                                />
+                                <p className="text-[10px] text-slate-500 mt-2">
+                                    Necessário para usar GPT-5. Obtenha em <a href="https://platform.openai.com/api-keys" target="_blank" className="text-green-400 hover:underline">OpenAI Platform</a>.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex justify-end pt-6 border-t border-slate-700">

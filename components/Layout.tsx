@@ -24,12 +24,19 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     }
   }, [activeTab]); // Atualiza ao mudar de aba
 
-  const navItems = [
+  interface NavItem {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+    disabled?: boolean;
+  }
+
+  const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Visão Geral', icon: Icons.Dashboard },
     { id: 'projects', label: 'Projetos', icon: Icons.Hammer },
     { id: 'clients', label: 'Clientes', icon: Icons.Users },
     { id: 'catalog', label: 'Catálogo MDF', icon: Icons.Book },
-    { id: 'ai-studio', label: 'Laboratório IA', icon: Icons.Zap },
+    { id: 'ai-studio', label: 'Estúdio 2D', icon: Icons.Layout },
     { id: 'settings', label: 'Configurações', icon: Icons.Settings },
     { id: 'admin', label: 'Administração', icon: Icons.Shield },
   ];
@@ -50,8 +57,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           {navItems.map(item => (
             <button
               key={item.id}
-              onClick={() => item.id === 'admin' ? window.location.href = '/admin' : setActiveTab(item.id)}
-              className={`flex items-center gap-2 text-sm font-medium transition-colors ${activeTab === item.id ? 'text-wood-400' : 'text-slate-400 hover:text-white'
+              onClick={() => {
+                if (item.disabled) return;
+                item.id === 'admin' ? window.location.href = '/admin' : setActiveTab(item.id);
+              }}
+              className={`flex items-center gap-2 text-sm font-medium transition-colors ${item.disabled ? 'text-slate-600 cursor-not-allowed' :
+                activeTab === item.id ? 'text-wood-400' : 'text-slate-400 hover:text-white'
                 }`}
             >
               <item.icon className="w-4 h-4" />
@@ -121,15 +132,20 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
               <button
                 key={item.id}
                 onClick={() => {
+                  if (item.disabled) return;
                   setActiveTab(item.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`flex items-center gap-4 p-4 rounded-xl transition-all border ${activeTab === item.id
-                  ? 'bg-wood-900/20 text-wood-400 border-wood-600/50 shadow-lg shadow-wood-900/20'
-                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                className={`flex items-center gap-4 p-4 rounded-xl transition-all border ${item.disabled
+                  ? 'bg-slate-900/50 text-slate-600 border-slate-800 cursor-not-allowed'
+                  : activeTab === item.id
+                    ? 'bg-wood-900/20 text-wood-400 border-wood-600/50 shadow-lg shadow-wood-900/20'
+                    : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                   }`}
               >
-                <div className={`p-2 rounded-lg ${activeTab === item.id ? 'bg-wood-600 text-white' : 'bg-slate-900 text-slate-400'}`}>
+                <div className={`p-2 rounded-lg ${item.disabled ? 'bg-slate-800 text-slate-600' :
+                  activeTab === item.id ? 'bg-wood-600 text-white' : 'bg-slate-900 text-slate-400'
+                  }`}>
                   <item.icon className="w-6 h-6" />
                 </div>
                 <span className="font-bold text-lg">{item.label}</span>

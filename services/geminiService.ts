@@ -118,185 +118,109 @@ export const parseVoiceCommand = async (transcript: string): Promise<VoiceComman
 };
 
 export const generateImageFromSketch = async (sketchBase64: string, prompt: string): Promise<string> => {
-  try {
-    const settings = getSettings();
-    const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+  const settings = getSettings();
+  const rawKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+  const apiKey = rawKey ? rawKey.trim() : "";
 
-    if (!apiKey) {
-      throw new Error("Chave de API não encontrada.");
-    }
-
-    const model = 'imagen-3.0-generate-002';
-
-    // Using raw REST API to avoid SDK version mismatches
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
-
-    const payload = {
-      instances: [
-        { prompt: `Furniture design, realistic, ${prompt}. High quality photorealistic render on white background.` }
-      ],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio: "4:3"
-      }
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      console.error("Gemini API Error:", errData);
-      throw new Error(errData.error?.message || `Erro API: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    // Response format for Imagen on Vertex/Gemini usually:
-    // { predictions: [ { bytesBase64Encoded: "..." } ] }
-
-    const base64Image = data.predictions?.[0]?.bytesBase64Encoded;
-
-    if (base64Image) {
-      return `data:image/png;base64,${base64Image}`;
-    }
-
-    throw new Error("Nenhuma imagem retornada pela API.");
-
-  } catch (error: any) {
-    console.warn("Imagen API failed, falling back to SVG generation...", error);
-
-    // Tentativa de diagnóstico automático apenas para log
-    try {
-      const settings = getSettings();
-      const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY;
-      if (apiKey) {
-        const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-        const listData = await listResp.json();
-        const imageModels = listData.models
-          ?.filter((m: any) => m.name.includes('image') || m.name.includes('generate'))
-          ?.map((m: any) => m.name.split('/').pop())
-          .join(', ');
-        console.log("Available Image Models:", imageModels);
-      }
-    } catch (e) { }
-
-    // FALLBACK LOOP: Descobre modelos dinamicamente e tenta gerar
-    let fallbackModels = [
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-      'gemini-1.5-pro'
-    ];
-
-    // Tenta buscar modelos disponíveis na conta do usuário
-    try {
-      console.log("Buscando modelos disponíveis na API...");
-      const settings = getSettings();
-      const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY;
-      if (apiKey) {
-        const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-        if (listResp.ok) {
-          const listData = await listResp.json();
-          const availableModels = listData.models
-            .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
-            .map((m: any) => m.name.replace('models/', '')); // Remove prefixo models/ se existir
-
-          if (availableModels.length > 0) {
-            // Prioriza modelos Flash e Pro
-            const sortedModels = availableModels.sort((a: string, b: string) => {
-              const score = (name: string) => {
-                if (name.includes('flash')) return 3;
-                if (name.includes('pro')) return 2;
-                return 1;
-              };
-              return score(b) - score(a);
-            });
-            console.log("Modelos encontrados via API:", sortedModels);
-            fallbackModels = sortedModels;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("Falha ao listar modelos dinâmicos, usando lista padrão.", e);
-    }
-
-    let lastError;
-
-    // Prepare image data for SDK
-    const base64Data = sketchBase64.replace(/^data:image\/[a-z]+;base64,/, "");
-
-    for (const svModel of fallbackModels) {
-      try {
-        console.log(`Tentando fallback SVG com modelo: ${svModel}`);
-        const ai = getAI();
-
-        const svgPrompt = `
-                You are a professional carpenter and technical drafter. 
-                Look at the attached sketch/drawing and the description: "${prompt}".
-                
-                Create a detailed SVG (Scalable Vector Graphics) code that represents this furniture based on the sketch.
-                
-                **CRITICAL STYLE INSTRUCTIONS:**
-                - Create a **SOLID 3D ISOMETRIC DRAWING** (SketchUp style).
-                - **FILLED FACES**: Use white fill (#FFFFFF) for all furniture faces to make them look solid. Do NOT use transparent wireframes.
-                - **OUTLINES**: Use bold black lines (#000000) for edges.
-                - **BACKGROUND**: The SVG MUST have a solid white background. Add a <rect width="100%" height="100%" fill="white"/> as the first element.
-                - Show realism: Add drawer handles, cabinet doors gaps, and thickness to tops.
-                - View: 3D Isometric view showing front and side.
-                - Aspect ratio: 4:3.
-                
-                Return ONLY the raw SVG code. Do not wrap in markdown. 
-                Start with <svg and end with </svg>.
-            `;
-
-        const result = await ai.models.generateContent({
-          model: svModel,
-          contents: [
-            {
-              parts: [
-                { text: svgPrompt },
-                { inlineData: { mimeType: "image/png", data: base64Data } }
-              ]
-            }
-          ]
-        });
-
-        let svgText = result.text || '';
-
-        // Clean up markdown if present
-        if (svgText.includes('```')) {
-          svgText = svgText.replace(/```xml/g, '').replace(/```svg/g, '').replace(/```/g, '');
-        }
-
-        // Validate SVG
-        if (svgText.trim().startsWith('<svg') && svgText.includes('</svg>')) {
-          console.log(`SVG Fallback sucesso com ${svModel}`);
-          // Safe Base64 encoding for UTF-8 (emojis, accents, etc)
-          const encodedSvg = btoa(unescape(encodeURIComponent(svgText)));
-          return `data:image/svg+xml;base64,${encodedSvg}`;
-        }
-
-      } catch (loopError: any) {
-        console.warn(`Falha no fallback com ${svModel}:`, loopError.message);
-        lastError = loopError;
-        // Continue to next model
-      }
-    }
-
-    // Se chegou aqui, todos falharam
-    console.error("Todos os fallbacks falharam.", lastError);
-    let msg = "Não foi possível gerar a imagem.";
-    if (lastError?.message?.includes('429')) {
-      msg = "Limite de uso da API atingido em todos os modelos. Tente novamente em alguns minutos.";
-    } else {
-      msg = "A geração de imagem realista falhou e a criação do desenho técnico também não foi possível. Verifique se sua chave API tem permissões.";
-    }
-
-    throw new Error(msg);
+  if (!apiKey) {
+    throw new Error("Chave de API não configurada.");
   }
+
+  // Debug Log (Masked)
+  console.log(`API Key carregada: ${apiKey.substring(0, 4)}... (Length: ${apiKey.length})`);
+
+  // Hardcoded Reliability List
+  // We explicitly mix v1beta (for 1.5) and v1 (for 1.0) logic below
+  const attempts = [
+    { model: 'gemini-1.5-flash', version: 'v1beta' },
+    { model: 'gemini-1.5-flash-latest', version: 'v1beta' },
+    { model: 'gemini-1.5-pro', version: 'v1beta' },
+    { model: 'gemini-pro', version: 'v1' }, // Fallback to classic
+  ];
+
+  let lastError;
+  const base64Data = sketchBase64.replace(/^data:image\/[a-z]+;base64,/, "");
+
+  for (const { model, version } of attempts) {
+    try {
+      console.log(`Tentando renderizar: ${model} (${version}) ...`);
+
+      const renderPrompt = `
+        You are an expert Architectural Visualizer.
+        
+        TASK:
+        Turn the attached sketch into a **High-Fidelity Technical Illustration** (SVG format).
+        
+        INPUT CONTEXT:
+        Description: "${prompt}"
+        
+        INSTRUCTIONS:
+        1. **STRICTLY FOLLOW THE GEOMETRY** of the sketch.
+        2. **STYLE**: Solid colors, slight gradients for 3D depth, isometric/perspective view.
+        3. **DETAILS**: Add handles, cabinet gaps, countertops.
+        4. **OUTPUT**: VALID SVG CODE ONLY. Start with <svg ...>.
+        5. **BACKGROUND**: Solid white <rect width="100%" height="100%" fill="white" />.
+        
+        Return ONLY the raw SVG string.
+      `;
+
+      // Construct URL based on version requirement
+      const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [{
+          parts: [
+            { text: renderPrompt },
+            { inlineData: { mimeType: "image/png", data: base64Data } }
+          ]
+        }]
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        console.warn(`Erro na API (${model}):`, errData);
+
+        if (response.status === 404) {
+          console.warn(`Modelo ${model} não encontrado (404).`);
+          continue;
+        }
+
+        if (response.status === 429) {
+          console.warn(`Limite excedido para ${model} (429), tentando próximo...`);
+          continue;
+        }
+
+        throw new Error(`Erro ${response.status}: ${errData.error?.message || response.statusText}`);
+      }
+
+      const data = await response.json();
+      let svgText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      // Clean up markdown if present
+      if (svgText.includes('```')) {
+        svgText = svgText.replace(/```xml/g, '').replace(/```svg/g, '').replace(/```/g, '');
+      }
+
+      // Validate SVG
+      if (svgText.trim().startsWith('<svg') && svgText.includes('</svg>')) {
+        console.log(`Render gerado com sucesso via ${model}`);
+        // Safe Base64 encoding for UTF-8 (emojis, accents, etc)
+        const encodedSvg = btoa(unescape(encodeURIComponent(svgText)));
+        return `data:image/svg+xml;base64,${encodedSvg}`;
+      }
+
+    } catch (error: any) {
+      console.warn(`Falha na tentativa com ${model}:`, error.message);
+      lastError = error;
+    }
+  }
+
+  console.error("Todas as tentativas de renderização falharam.", lastError);
+  throw new Error("Não foi possível conectar à IA. Verifique se sua Chave API em Ajustes está correta e ativa.");
 };

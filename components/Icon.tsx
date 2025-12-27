@@ -54,7 +54,8 @@ import {
   Heart,
   AlertTriangle,
   PenTool,
-  ArrowLeft
+  ArrowLeft,
+  Layout
 } from 'lucide-react';
 
 export const Icons = {
@@ -111,5 +112,6 @@ export const Icons = {
   Heart,
   AlertTriangle,
   PenTool,
-  ArrowLeft
+  ArrowLeft,
+  Layout
 };

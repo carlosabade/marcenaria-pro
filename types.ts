@@ -155,6 +155,8 @@ export interface AppSettings {
   hourlyRate: number;
   materialPrices: MaterialPrices;
   googleApiKey?: string;
+  openAIApiKey?: string;
+  aiProvider?: 'gemini' | 'openai';
   style?: string;
 }
 

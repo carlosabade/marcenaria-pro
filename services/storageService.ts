@@ -63,6 +63,8 @@ const defaultSettings: AppSettings = {
         handlePrice: 15.00
     },
     googleApiKey: '',
+    openAIApiKey: '',
+    aiProvider: 'gemini',
     style: 'Moderno'
 };
 

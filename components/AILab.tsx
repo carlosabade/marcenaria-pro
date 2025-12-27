@@ -1005,18 +1005,37 @@ const AILab: React.FC = () => {
 
             // Get settings
             const settings = getSettings();
+            const provider = settings.aiProvider || 'gemini';
 
-            // Call Gemini
-            const prompt = `Renderize uma imagem fotorealista de alta qualidade baseada neste layout de móveis planejados.
-            Estilo: ${settings.style}. Falta de iluminação natural. Materiais de alta qualidade.
-             Detalhes do pedido: Cliente quer móveis modernos.`; // You can customize prompt
+            // Call IA Provider
+            // Construct a detailed manifest of the scene
+            const itemsList = placedBlocks.map(b => {
+                const cat = blockLibrary[b.category];
+                const item = cat?.blocks[b.type];
+                return item ? item.name : 'Móvel';
+            }).join(', ');
 
-            const resultUrl = await generateImageFromSketch(imageData, prompt);
+            const prompt = `
+            Scene Content: ${itemsList || 'Custom Furniture Layout'}.
+            Style: ${settings.style || 'Moderno, MDF Branco e Amadeirado'}.
+            View: Perspective/Isometric.
+            Requirement: High-quality technical illustration with realistic textures/gradients.
+            `;
+
+            let resultUrl;
+            if (provider === 'openai') {
+                // Lazy load OpenAI Service or import it at top
+                const { generateImageFromSketchOpenAI } = await import('../services/openAIService');
+                resultUrl = await generateImageFromSketchOpenAI(imageData, prompt);
+            } else {
+                resultUrl = await generateImageFromSketch(imageData, prompt);
+            }
+
             setGeneratedImage(resultUrl);
 
         } catch (err: any) {
             console.error(err);
-            setError("Erro ao gerar imagem. Verifique sua chave API ou tente novamente.");
+            setError(`Erro ao gerar imagem: ${err.message || 'Verifique sua chave de API.'}`);
         } finally {
             setGenerating(false);
         }
@@ -1155,7 +1174,8 @@ const AILab: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="bg-white p-1 rounded-lg shadow-md border border-slate-200 pointer-events-auto">
+                    <div className="bg-white p-1 rounded-lg shadow-md border border-slate-200 pointer-events-auto hidden">
+                        {/* AI Generation Button Hidden - Feature Repurposed to 2D Studio */}
                         <button
                             onClick={generateImage}
                             disabled={generating}
