@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
           enabled: true
         },
         manifest: {
+          id: '/',
           name: 'Marcenaria Pro',
           short_name: 'MarcenariaPro',
           description: 'Gestão Inteligente para Marcenarias',
@@ -29,14 +30,14 @@ export default defineConfig(({ mode }) => {
           categories: ['business', 'productivity', 'utilities'],
           screenshots: [
             {
-              src: 'screenshot-mobile.png',
+              src: '/screenshot-mobile.png',
               sizes: '375x667',
               type: 'image/png',
               form_factor: 'narrow',
               label: 'Painel Mobile'
             },
             {
-              src: 'screenshot-desktop.png',
+              src: '/screenshot-desktop.png',
               sizes: '1280x800',
               type: 'image/png',
               form_factor: 'wide',
@@ -45,17 +46,17 @@ export default defineConfig(({ mode }) => {
           ],
           icons: [
             {
-              src: 'pwa-192x192.png',
+              src: '/pwa-192x192.png',
               sizes: '192x192',
               type: 'image/png'
             },
             {
-              src: 'pwa-512x512.png',
+              src: '/pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png'
             },
             {
-              src: 'pwa-512x512.png',
+              src: '/pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable'
