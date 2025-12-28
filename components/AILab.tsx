@@ -934,16 +934,7 @@ const AILab: React.FC = () => {
         setIsDragging(false);
     };
 
-    const handleWheel = (e: React.WheelEvent) => {
-        // e.preventDefault(); // React synthetic events don't support preventDefault on wheel well?
-        // In a real app we might attach non-passive listener
-        const factor = 1.1;
-        if (e.deltaY < 0) {
-            setZoom(z => Math.min(z * factor, 5));
-        } else {
-            setZoom(z => Math.max(z / factor, 0.2));
-        }
-    };
+
 
     const generateImage = async () => {
         if (placedBlocks.length === 0) {
@@ -1119,6 +1110,28 @@ const AILab: React.FC = () => {
     // Mobile Sidebar State
     const [isMobileLibraryOpen, setIsMobileLibraryOpen] = useState(false);
 
+    // Non-passive wheel listener for Zoom
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const factor = 1.1;
+            if (e.deltaY < 0) {
+                setZoom(z => Math.min(z * factor, 5));
+            } else {
+                setZoom(z => Math.max(z / factor, 0.2));
+            }
+        };
+
+        canvas.addEventListener('wheel', onWheel, { passive: false });
+
+        return () => {
+            canvas.removeEventListener('wheel', onWheel);
+        };
+    }, []);
+
     return (
         <div className="flex h-full bg-white relative overflow-hidden">
             {/* Sidebar Library - Responsive Drawer */}
@@ -1286,7 +1299,6 @@ const AILab: React.FC = () => {
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleMouseUp}
-                        onWheel={handleWheel}
                     />
                 </div>
             </div>
