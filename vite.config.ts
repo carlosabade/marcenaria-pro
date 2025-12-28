@@ -13,10 +13,18 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
+        strategies: 'injectManifest',
+        srcDir: '.',
+        filename: 'service-worker.js',
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
         devOptions: {
-          enabled: true
+          enabled: true,
+          type: 'module'
+        },
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
         },
         manifest: {
           id: '/',
@@ -30,14 +38,21 @@ export default defineConfig(({ mode }) => {
           categories: ['business', 'productivity', 'utilities'],
           screenshots: [
             {
-              src: '/screenshot-mobile.png',
-              sizes: '625x718',
+              src: '/screenshots/home.png',
+              sizes: '540x720',
               type: 'image/png',
               form_factor: 'narrow',
-              label: 'Painel Mobile'
+              label: 'Tela Inicial'
             },
             {
-              src: '/screenshot-desktop.png',
+              src: '/screenshots/orcamento.png',
+              sizes: '540x720',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'Criar Orçamento'
+            },
+            {
+              src: '/screenshots/desktop.png',
               sizes: '1024x1024',
               type: 'image/png',
               form_factor: 'wide',
@@ -63,37 +78,7 @@ export default defineConfig(({ mode }) => {
             }
           ]
         },
-        workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'supabase-storage-images',
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-                }
-              }
-            },
-            {
-              urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'supabase-api-cache',
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 60 * 60 * 24 // 1 day
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                },
-                networkTimeoutSeconds: 10 // Timeout fallback to cache
-              }
-            }
-          ]
-        }
+
       })
     ],
     define: {

@@ -32,18 +32,38 @@
     ],
     "screenshots": [
         {
-            "src": "/screenshot-mobile.png",
-            "sizes": "625x718",
+            "src": "/screenshots/home.png",
+            "sizes": "540x720",
             "type": "image/png",
             "form_factor": "narrow",
-            "label": "Painel Mobile"
+            "label": "Tela Inicial"
         },
         {
-            "src": "/screenshot-desktop.png",
+            "src": "/screenshots/orcamento.png",
+            "sizes": "540x720",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Criar Orçamento"
+        },
+        {
+            "src": "/screenshots/desktop.png",
             "sizes": "1024x1024",
             "type": "image/png",
             "form_factor": "wide",
             "label": "Dashboard Desktop"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Novo Orçamento",
+            "url": "/",
+            "icons": [
+                {
+                    "src": "/pwa-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
         }
     ]
 }
