@@ -36,6 +36,13 @@ export default defineConfig(({ mode }) => {
           display: 'standalone',
           orientation: 'portrait',
           categories: ['business', 'productivity', 'utilities'],
+          scope: '/',
+          display_override: ['window-controls-overlay', 'standalone'],
+          launch_handler: {
+            client_mode: 'navigate-existing'
+          },
+          prefer_related_applications: false,
+          iarc_rating_id: 'e84b072d-71b3-4d3e-86ae-31a8ce4e53b7',
           screenshots: [
             {
               src: '/screenshots/home.png',
@@ -57,6 +64,21 @@ export default defineConfig(({ mode }) => {
               type: 'image/png',
               form_factor: 'wide',
               label: 'Dashboard Desktop'
+            }
+          ],
+          shortcuts: [
+            {
+              name: 'Novo Orçamento',
+              short_name: 'Orçar',
+              description: 'Criar novo orçamento rápido',
+              url: '/',
+              icons: [
+                {
+                  src: '/pwa-192x192.png',
+                  sizes: '192x192',
+                  type: 'image/png'
+                }
+              ]
             }
           ],
           icons: [

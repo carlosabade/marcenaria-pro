@@ -8,6 +8,16 @@
     "background_color": "#0f172a",
     "theme_color": "#92400e",
     "orientation": "portrait-primary",
+    "scope": "/",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone"
+    ],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "prefer_related_applications": false,
+    "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
     "icons": [
         {
             "src": "/pwa-192x192.png",
