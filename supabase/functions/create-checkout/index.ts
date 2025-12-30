@@ -62,7 +62,64 @@ serve(async (req) => {
             throw new Error("Corpo da requisição inválido (JSON esperado).");
         }
 
-        const { plano } = body;
+        const { plano, integrity_token } = body;
+
+        // --- PLAY INTEGRITY CHECK ---
+        // "No Antigravity, deixe assim"
+        if (integrity_token) {
+            console.log("Validando Integrity Token...");
+            // TODO: Call Google Play Integrity API here using Service Account
+            // const verificationResult = await callPlayIntegrityApi(integrity_token);
+
+            // Mocking the result structure for implementation guidance
+            // In production, replace this with actual API response
+            const verificationResult = {
+                deviceIntegrity: { deviceRecognitionVerdict: ["MEETS_DEVICE_INTEGRITY"] },
+                appIntegrity: { appRecognitionVerdict: "PLAY_RECOGNIZED" },
+                accountDetails: { appLicensingVerdict: "LICENSED" }
+            };
+
+            // 1. Device Integrity
+            // "Aceitar somente: deviceIntegrity: ['MEETS_DEVICE_INTEGRITY']"
+            // "Desmarque: Strong Integrity, Basic Integrity"
+            const deviceVerdicts = verificationResult.deviceIntegrity.deviceRecognitionVerdict;
+            if (!deviceVerdicts.includes("MEETS_DEVICE_INTEGRITY")) {
+                console.error("Integrity Error: MEETS_DEVICE_INTEGRITY not found");
+                // throw new Error("Dispositivo não atende aos requisitos de segurança."); 
+                // Uncomment to enforce
+            }
+
+            // 2. App Integrity
+            // "Aceitar: PLAY_RECOGNIZED, UNRECOGNIZED_VERSION, UNEVALUATED"
+            // "NÃO bloquear versões não reconhecidas"
+            const appVerdict = verificationResult.appIntegrity.appRecognitionVerdict;
+            const allowedAppVerdicts = ["PLAY_RECOGNIZED", "UNRECOGNIZED_VERSION", "UNEVALUATED"];
+
+            if (!allowedAppVerdicts.includes(appVerdict)) {
+                console.error(`Integrity Error: App Verdict '${appVerdict}' not allowed`);
+                // throw new Error("Integridade do aplicativo falhou.");
+            }
+
+            // 3. App Licensing
+            // "Permitir: LICENSED, UNEVALUATED"
+            // "NÃO bloquear UNEVALUATED"
+            const licenseVerdict = verificationResult.accountDetails.appLicensingVerdict;
+            const allowedLicenses = ["LICENSED", "UNEVALUATED"];
+
+            if (!allowedLicenses.includes(licenseVerdict)) {
+                console.error(`Integrity Error: License Verdict '${licenseVerdict}' not allowed`);
+                // throw new Error("Licença do aplicativo inválida.");
+            }
+
+            // "Desative completamente: Atividade recente, Atributos, Play Protect, Risco de acesso"
+            // (We simply do not check them here)
+
+            console.log("Play Integrity Validation Passed (Mock).");
+        } else {
+            console.warn("Aviso: integrity_token não fornecido. Pule esta validação apenas em Dev.");
+        }
+        // ----------------------------
+
         console.log(`Processando plano: ${plano} para usuário ${user.email}`);
 
         // 5. Mapear Preços
