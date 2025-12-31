@@ -45,11 +45,8 @@ jobs:
         echo "{\"jdkPath\": \"${JAVA_HOME}\", \"androidSdkPath\": \"${ANDROID_HOME}\"}" > $HOME/.bubblewrap/config.json
         cat $HOME/.bubblewrap/config.json
 
-    - name: Scaffold Android Project
-      run: bubblewrap update
-
     - name: Build TWA
-      run: bubblewrap build
+      run: bubblewrap build --manifest twa-manifest.json --skipPwaValidation
 
     - name: Upload AAB Artifact
       uses: actions/upload-artifact@v4
