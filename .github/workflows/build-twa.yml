@@ -45,15 +45,11 @@ jobs:
         echo "{\"jdkPath\": \"${JAVA_HOME}\", \"androidSdkPath\": \"${ANDROID_HOME}\"}" > $HOME/.bubblewrap/config.json
         cat $HOME/.bubblewrap/config.json
 
-    - name: Initialize TWA Project
-      run: |
-        mkdir -p android-project
-        bubblewrap init --manifest twa-manifest.json --directory android-project
+    - name: Scaffold Android Project
+      run: bubblewrap update
 
     - name: Build TWA
-      run: |
-        cd android-project
-        bubblewrap build
+      run: bubblewrap build
 
     - name: Upload AAB Artifact
       uses: actions/upload-artifact@v4
