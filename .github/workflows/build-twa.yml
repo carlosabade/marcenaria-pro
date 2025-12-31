@@ -46,7 +46,9 @@ jobs:
         cat $HOME/.bubblewrap/config.json
 
     - name: Initialize TWA Project
-      run: bubblewrap init --manifest twa-manifest.json --directory android-project
+      run: |
+        mkdir -p android-project
+        bubblewrap init --manifest twa-manifest.json --directory android-project
 
     - name: Build TWA
       run: |
