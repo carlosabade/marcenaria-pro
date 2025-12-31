@@ -16,7 +16,19 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-// ... (Existing interfaces) ...
+// Interfaces internas do parser
+interface ExpenseData {
+  description: string;
+  amount: number;
+  category: ExpenseCategory;
+  date: string;
+}
+
+interface AppointmentData {
+  title: string;
+  date: string; // ISO String com Data e Hora
+  location: string;
+}
 
 export type VoiceCommandResult =
   | { type: 'expense', data: ExpenseData }
