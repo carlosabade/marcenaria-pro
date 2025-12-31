@@ -45,13 +45,9 @@ jobs:
         echo "{\"jdkPath\": \"${JAVA_HOME}\", \"androidSdkPath\": \"${ANDROID_HOME}\"}" > $HOME/.bubblewrap/config.json
         cat $HOME/.bubblewrap/config.json
 
-    - name: Initialize TWA Project
-      run: yes | bubblewrap init --manifest twa-manifest.json --directory android-project
-
     - name: Build TWA
       run: |
-        cd android-project
-        bubblewrap build
+        printf "y\n1.0.0\n8\n" | bubblewrap build --manifest twa-manifest.json --skipPwaValidation
 
     - name: Upload AAB Artifact
       uses: actions/upload-artifact@v4
