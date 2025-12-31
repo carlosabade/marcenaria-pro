@@ -1,0 +1,38 @@
+{
+    "packageId": "com.marcenariapro.oficial02",
+    "host": "marcenaria-pro-bay.vercel.app",
+    "name": "Marcenaria Pro",
+    "launcherName": "MarcPro",
+    "display": "standalone",
+    "themeColor": "#92400e",
+    "navigationColor": "#0f172a",
+    "backgroundColor": "#0f172a",
+    "startUrl": "/",
+    "iconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
+    "maskableIconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
+    "appVersion": "1.0.0",
+    "appVersionCode": 1,
+    "signingKey": {
+        "path": "./android.keystore",
+        "alias": "android",
+        "keyPassword": "password",
+        "storePassword": "password"
+    },
+    "generatorApp": "bubblewrap-cli",
+    "webManifestUrl": "https://marcenaria-pro-bay.vercel.app/manifest.json",
+    "fallbackType": "customtabs",
+    "features": {
+        "playBilling": {
+            "enabled": false
+        },
+        "locationDelegation": {
+            "enabled": false
+        },
+        "playCore": {
+            "enabled": false
+        }
+    },
+    "alphaDependencies": {
+        "enabled": false
+    }
+}
