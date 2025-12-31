@@ -58,7 +58,7 @@ jobs:
           "regenerate" { send "y\r"; exp_continue }
           "Create" { send "y\r"; exp_continue }
           "versionName" { send "1.0.0\r"; exp_continue }
-          "versionCode" { send "15\r"; exp_continue }
+          "versionCode" { send "16\r"; exp_continue }
           -re "(?i).*notification.*" { send "n\r"; exp_continue }
           "Password" { send "password\r"; exp_continue }
           eof
@@ -66,6 +66,11 @@ jobs:
         EOF
         chmod +x build.exp
         ./build.exp
+
+    - name: Fix Bubblewrap Generation Bug
+      run: |
+        sed -i 's/enableNotifications: ,/enableNotifications: false,/g' app/build.gradle || true
+        cat app/build.gradle | grep "enableNotifications"
 
     - name: Force Build and Locate AAB
       run: |
