@@ -31,7 +31,7 @@ export const parseVoiceCommand = async (transcript: string): Promise<VoiceComman
     const now = new Date();
     const currentISO = now.toISOString();
 
-    const model = 'gemini-2.0-flash';
+    const model = 'gemini-1.5-flash'; // Reverting to stable 1.5 model for reliability
     const prompt = `
       Você é um assistente para um marceneiro. Analise o texto falado e identifique se é um registro de GASTO (dinheiro) ou um AGENDAMENTO (compromisso/lembrete).
       

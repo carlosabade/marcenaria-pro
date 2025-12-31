@@ -78,19 +78,24 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
     }
   };
 
+  const [statusLog, setStatusLog] = useState<string>("Ready");
+
   const handleProcessText = async (text: string) => {
     setIsProcessing(true);
+    setStatusLog("Processing...");
     const parsed = await parseVoiceCommand(text);
     setIsProcessing(false);
 
     if (parsed) {
       if (parsed.type === 'error') {
-        // Show the actual error message from the service
+        setStatusLog(`Error: ${parsed.message}`);
         alert(parsed.message);
       } else {
+        setStatusLog("Success");
         setResult(parsed);
       }
     } else {
+      setStatusLog("Null result (Low confidence)");
       alert("Não entendi. Tente falar: 'Gastei 50 reais em cola' ou 'Agendar visita amanhã às 14h'");
     }
   };
@@ -227,27 +232,27 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
         )}
       </div>
     ) : (
-    <div className="space-y-4">
+      <div className="space-y-4">
 
-      {result.type === 'expense' ? renderExpenseForm(result.data) : renderAppointmentForm(result.data)}
+        {result.type === 'expense' ? renderExpenseForm(result.data) : renderAppointmentForm(result.data)}
 
-      <div className="flex gap-2 pt-2">
-        <button
-          onClick={() => setResult(null)}
-          className="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleConfirm}
-          className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium flex justify-center items-center gap-2"
-        >
-          <Icons.Save className="w-4 h-4" />
-          {result.type === 'expense' ? 'Salvar Gasto' : 'Agendar'}
-        </button>
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={() => setResult(null)}
+            className="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium flex justify-center items-center gap-2"
+          >
+            <Icons.Save className="w-4 h-4" />
+            {result.type === 'expense' ? 'Salvar Gasto' : 'Agendar'}
+          </button>
+        </div>
       </div>
-    </div>
-  )
+    )
   }
   <div className="mt-4 pt-4 border-t border-slate-700/50 flex justify-between items-center text-[10px] text-slate-600 font-mono">
     <span>Sys v2.2 (Key: {getSettings().googleApiKey ? 'Custom' : 'System'})</span>
