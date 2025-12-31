@@ -58,7 +58,7 @@ jobs:
           "regenerate" { send "y\r"; exp_continue }
           "Create" { send "y\r"; exp_continue }
           "versionName" { send "1.0.0\r"; exp_continue }
-          "versionCode" { send "20\r"; exp_continue }
+          "versionCode" { send "21\r"; exp_continue }
           -re "(?i).*notification.*" { send "n\r"; exp_continue }
           "Password" { send "password\r"; exp_continue }
           eof

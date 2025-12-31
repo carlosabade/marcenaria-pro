@@ -1,5 +1,5 @@
 {
-    "packageId": "com.marcenariapro.oficial02",
+    "packageId": "com.marcenariapro.oficial03",
     "host": "marcenaria-pro-bay.vercel.app",
     "name": "Marcenaria Pro",
     "launcherName": "MarcPro",
@@ -11,7 +11,7 @@
     "iconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
     "maskableIconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
     "appVersion": "1.0.0",
-    "appVersionCode": 20,
+    "appVersionCode": 21,
     "signingKey": {
         "path": "./android.keystore",
         "alias": "android",

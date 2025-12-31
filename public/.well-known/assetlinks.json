@@ -5,9 +5,9 @@
         ],
         "target": {
             "namespace": "android_app",
-            "package_name": "com.marcenariapro.oficial02",
+            "package_name": "com.marcenariapro.oficial03",
             "sha256_cert_fingerprints": [
-                "A4:35:AC:B9:F0:D5:DE:AC:57:4B:B1:B5:9C:07:B4:40:E3:91:69:43:1E:CE:17:7F:1A:B4:2B:C9:0F:7E:AB:E2"
+                "EC:BC:1D:5C:90:AC:14:39:A1:BE:FD:7C:47:CA:2E:60:FA:52:0F:80:1A:B4:D1:0D:F3:86:06:53:E7:5D:06:7F"
             ]
         }
     }
