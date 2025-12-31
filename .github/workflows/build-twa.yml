@@ -71,14 +71,16 @@ jobs:
       run: |
         sed -i 's/enableNotifications: ,/enableNotifications: false,/g' app/build.gradle || true
         sed -i 's/splashScreenFadeOutDuration: ,/splashScreenFadeOutDuration: 300,/g' app/build.gradle || true
-        cat app/build.gradle | grep "enableNotifications"
-        cat app/build.gradle | grep "splashScreenFadeOutDuration"
+        echo "=== BUILD.GRADLE CONTENT ==="
+        cat app/build.gradle
+        echo "============================"
 
     - name: Force Build and Locate AAB
       run: |
+        cp android.keystore app/android.keystore || true
         chmod +x gradlew
         ./gradlew bundleRelease
-        find . -name "*.aab" -exec cp {} app-release-bundle.aab \;
+        find app/build/outputs/bundle/release -name "*.aab" -exec cp {} app-release-bundle.aab \;
 
     - name: List Files (Debug)
       run: find . -maxdepth 4 -not -path '*/.*'

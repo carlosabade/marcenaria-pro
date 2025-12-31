@@ -11,7 +11,7 @@
     "iconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
     "maskableIconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
     "appVersion": "1.0.0",
-    "appVersionCode": 18,
+    "appVersionCode": 19,
     "signingKey": {
         "path": "./android.keystore",
         "alias": "android",
