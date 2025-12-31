@@ -11,7 +11,7 @@
     "iconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
     "maskableIconUrl": "https://marcenaria-pro-bay.vercel.app/pwa-512x512.png",
     "appVersion": "1.0.0",
-    "appVersionCode": 14,
+    "appVersionCode": 15,
     "signingKey": {
         "path": "./android.keystore",
         "alias": "android",
@@ -29,9 +29,6 @@
             "enabled": false
         },
         "playCore": {
-            "enabled": false
-        },
-        "enableNotifications": {
             "enabled": false
         }
     },
