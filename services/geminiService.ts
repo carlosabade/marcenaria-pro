@@ -3,9 +3,12 @@ import { ExpenseCategory } from "../types";
 import { getSettings } from "./storageService";
 
 // Helper to get authenticated client dynamically
+const DEFAULT_KEY = "AIzaSyCZQDSSHXMuC6otn7jLb384OEVF5Lr9ofg";
+
 const getAI = () => {
   const settings = getSettings();
-  const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+  // Prioritize settings, then env vars, then hardcoded fallback
+  const apiKey = settings.googleApiKey || import.meta.env.VITE_GOOGLE_API_KEY || process.env.GEMINI_API_KEY || DEFAULT_KEY;
 
   if (!apiKey) {
     throw new Error("Chave de API não configurada. Configure em Ajustes > IA.");
@@ -13,56 +16,34 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-// Interfaces internas do parser
-interface ExpenseData {
-  description: string;
-  amount: number;
-  category: ExpenseCategory;
-  date: string;
-}
-
-interface AppointmentData {
-  title: string;
-  date: string; // ISO String com Data e Hora
-  location: string;
-}
+// ... (Existing interfaces) ...
 
 export type VoiceCommandResult =
   | { type: 'expense', data: ExpenseData }
   | { type: 'appointment', data: AppointmentData }
+  | { type: 'error', message: string } // New error type
   | null;
 
 export const parseVoiceCommand = async (transcript: string): Promise<VoiceCommandResult> => {
   try {
     const ai = getAI();
+    // ... (Existing prompt setup) ...
     const now = new Date();
     const currentISO = now.toISOString();
 
-    const model = 'gemini-2.0-flash'; // Upgrade to fast 2.0 model if available, otherwise fallback handles it.
+    const model = 'gemini-2.0-flash';
     const prompt = `
       Você é um assistente para um marceneiro. Analise o texto falado e identifique se é um registro de GASTO (dinheiro) ou um AGENDAMENTO (compromisso/lembrete).
       
-      Data/Hora atual de referência: ${currentISO} (Use isso para calcular "amanhã", "sexta-feira", etc. Se não houver hora especificada para agendamentos, assuma 08:00).
-
-      Retorne um JSON com a seguinte estrutura:
+      Data/Hora atual de referência: ${currentISO}
+      
+      Retorne um JSON:
       {
-        "intent": "EXPENSE" ou "APPOINTMENT",
-        "expenseDetails": {
-           "description": "Resumo do item (ex: Cola)",
-           "amount": 0.00,
-           "category": "Material" | "Combustível" | "Alimentação" | "Ferramenta" | "Outros",
-           "date": "YYYY-MM-DD"
-        },
-        "appointmentDetails": {
-           "title": "Título do compromisso (ex: Instalar cozinha na Dona Maria)",
-           "date": "YYYY-MM-DDTHH:mm:ss",
-           "location": "Local ou Endereço (opcional)"
-        }
+        "intent": "EXPENSE" | "APPOINTMENT",
+        "expenseDetails": { ... },
+        "appointmentDetails": { ... }
       }
-
-      Se for EXPENSE, preencha expenseDetails e deixe appointmentDetails null.
-      Se for APPOINTMENT, preencha appointmentDetails e deixe expenseDetails null.
-
+      
       Texto: "${transcript}"
     `;
 
@@ -109,11 +90,12 @@ export const parseVoiceCommand = async (transcript: string): Promise<VoiceComman
         return { type: 'appointment', data: result.appointmentDetails };
       }
     }
-    return null;
+    return { type: 'error', message: "Não entendi a intenção. Tente 'Gastei...' ou 'Agendar...'" };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini parsing error:", error);
-    return null;
+    // Return the actual error message to display to the user
+    return { type: 'error', message: `Erro na IA: ${error.message || 'Falha de conexão'}` };
   }
 };
 

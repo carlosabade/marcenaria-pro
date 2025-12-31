@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Icons } from './Icon';
 import { parseVoiceCommand, VoiceCommandResult } from '../services/geminiService';
+import { getSettings } from '../services/storageService';
 import { DailyExpense, ExpenseCategory, Appointment } from '../types';
 
 interface VoiceExpenseInputProps {
@@ -83,11 +84,26 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
     setIsProcessing(false);
 
     if (parsed) {
-      setResult(parsed);
+      if (parsed.type === 'error') {
+        // Show the actual error message from the service
+        alert(parsed.message);
+      } else {
+        setResult(parsed);
+      }
     } else {
       alert("Não entendi. Tente falar: 'Gastei 50 reais em cola' ou 'Agendar visita amanhã às 14h'");
     }
   };
+
+  if (!SpeechRecognition) {
+    return (
+      <div className="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
+        <h3 className="text-lg font-semibold text-wood-300 mb-4 flex items-center gap-2"><Icons.Mic className="w-5 h-5 text-slate-500" /> Comando de Voz Indisponível</h3>
+        <p className="text-slate-400 text-sm">Seu navegador não suporta reconhecimento de voz nativo.</p>
+        <p className="text-xs text-slate-500 mt-2">Use o Chrome ou habilite o microfone.</p>
+      </div>
+    )
+  }
 
   const handleConfirm = () => {
     if (!result) return;
@@ -187,8 +203,8 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
           <button
             onClick={toggleListening}
             className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
-                ? 'bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]'
-                : 'bg-wood-600 hover:bg-wood-500 shadow-lg'
+              ? 'bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]'
+              : 'bg-wood-600 hover:bg-wood-500 shadow-lg'
               }`}
           >
             <Icons.Mic className={`w-8 h-8 text-white ${isListening ? 'animate-bounce' : ''}`} />
@@ -232,6 +248,10 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
           </div>
         </div>
       )}
+      <div className="mt-4 pt-4 border-t border-slate-700/50 flex justify-between items-center text-[10px] text-slate-600 font-mono">
+        <span>Sys v2.2 (Key: {getSettings().googleApiKey ? 'Custom' : 'System'})</span>
+        <span>{SpeechRecognition ? 'Mic: OK' : 'Mic: Error'}</span>
+      </div>
     </div>
   );
 };

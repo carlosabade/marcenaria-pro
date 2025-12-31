@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
   // CÁLCULO DE RECEITA E TERMÔMETRO
   const currentMonthProjects = projects.filter(p => {
     const d = new Date(p.startDate);
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear && p.status !== 'quote';
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear && (p.status === 'active' || p.status === 'completed');
   });
 
   const totalRevenue = currentMonthProjects.reduce((sum, p) => {

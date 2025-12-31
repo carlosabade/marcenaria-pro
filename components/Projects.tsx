@@ -32,6 +32,7 @@ const Projects: React.FC = () => {
     const [fixedCosts, setFixedCosts] = useState<FixedCost[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'details' | 'calculator' | 'chat' | 'contract' | 'videos'>('details');
+    const [projectFilter, setProjectFilter] = useState<'all' | 'quote' | 'active' | 'completed'>('all');
 
     const [contractView, setContractView] = useState<'edit' | 'preview'>('edit');
     const [lastFocusedClause, setLastFocusedClause] = useState<string | null>(null);
@@ -652,6 +653,20 @@ const Projects: React.FC = () => {
                                         <label className="text-[10px] text-slate-500 font-bold uppercase">Entrega</label>
                                         <input type="date" className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-wood-500" value={form.deadline} onChange={e => { setForm({ ...form, deadline: e.target.value }); setIsDirty(true); }} />
                                     </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] text-slate-500 font-bold uppercase">Status do Projeto</label>
+                                        <select
+                                            className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-wood-500 cursor-pointer"
+                                            value={form.status || 'quote'}
+                                            onChange={e => { setForm({ ...form, status: e.target.value as any }); setIsDirty(true); }}
+                                        >
+                                            <option value="quote">Orçamento</option>
+                                            <option value="active">Em Produção</option>
+                                            <option value="completed">Finalizado</option>
+                                            <option value="pending_approval">Aguardando Aprovação</option>
+                                            <option value="rejected">Recusado</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -972,8 +987,15 @@ const Projects: React.FC = () => {
                     <button onClick={handleNew} className="bg-wood-600 hover:bg-wood-500 text-white px-8 py-3 rounded-xl flex items-center gap-3 shadow-xl font-black transition-all active:scale-95"><Icons.Plus className="w-5 h-5" /> Novo Orçamento</button>
                 </div>
 
+                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                    <button onClick={() => setProjectFilter('all')} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${projectFilter === 'all' ? 'bg-white text-wood-900 shadow-lg scale-105' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>Todos</button>
+                    <button onClick={() => setProjectFilter('quote')} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${projectFilter === 'quote' ? 'bg-yellow-500 text-yellow-950 shadow-lg shadow-yellow-500/20 scale-105' : 'bg-slate-800 text-slate-400 hover:text-yellow-400'}`}>Orçamentos</button>
+                    <button onClick={() => setProjectFilter('active')} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${projectFilter === 'active' ? 'bg-blue-500 text-blue-950 shadow-lg shadow-blue-500/20 scale-105' : 'bg-slate-800 text-slate-400 hover:text-blue-400'}`}>Em Produção</button>
+                    <button onClick={() => setProjectFilter('completed')} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${projectFilter === 'completed' ? 'bg-green-500 text-green-950 shadow-lg shadow-green-500/20 scale-105' : 'bg-slate-800 text-slate-400 hover:text-green-400'}`}>Finalizados</button>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {projects.map(p => {
+                    {projects.filter(p => projectFilter === 'all' || p.status === projectFilter).map(p => {
                         const fin = calculateProjectFinancials(p, effectiveSettings);
                         const totalDays = (p.productionDays || 0) + (p.assemblyDays || 0);
                         const totalCost = p.materialsCost + (fin.carpenterValue || 0) + (p.freightCost || 0);
