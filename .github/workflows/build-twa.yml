@@ -45,9 +45,25 @@ jobs:
         echo "{\"jdkPath\": \"${JAVA_HOME}\", \"androidSdkPath\": \"${ANDROID_HOME}\"}" > $HOME/.bubblewrap/config.json
         cat $HOME/.bubblewrap/config.json
 
-    - name: Build TWA
+    - name: Install Expect
+      run: sudo apt-get install -y expect
+
+    - name: Build TWA with Expect
       run: |
-        printf "y\n1.0.0\n8\n" | bubblewrap build --manifest twa-manifest.json --skipPwaValidation
+        cat <<EOF > build.exp
+        #!/usr/bin/expect -f
+        set timeout -1
+        spawn bubblewrap build --manifest twa-manifest.json --skipPwaValidation
+        expect {
+          "regenerate" { send "y\r"; exp_continue }
+          "Create" { send "y\r"; exp_continue }
+          "versionName" { send "1.0.0\r"; exp_continue }
+          "versionCode" { send "9\r"; exp_continue }
+          eof
+        }
+        EOF
+        chmod +x build.exp
+        ./build.exp
 
     - name: Upload AAB Artifact
       uses: actions/upload-artifact@v4
