@@ -58,13 +58,19 @@ jobs:
           "regenerate" { send "y\r"; exp_continue }
           "Create" { send "y\r"; exp_continue }
           "versionName" { send "1.0.0\r"; exp_continue }
-          "versionCode" { send "12\r"; exp_continue }
+          "versionCode" { send "13\r"; exp_continue }
           "Password" { send "password\r"; exp_continue }
           eof
         }
         EOF
         chmod +x build.exp
         ./build.exp
+
+    - name: Force Build and Locate AAB
+      run: |
+        chmod +x gradlew
+        ./gradlew bundleRelease
+        find . -name "*.aab" -exec cp {} app-release-bundle.aab \;
 
     - name: List Files (Debug)
       run: find . -maxdepth 4 -not -path '*/.*'
@@ -73,7 +79,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-release-bundle
-        path: "**/*.aab"
+        path: app-release-bundle.aab
 
     - name: Upload Keystore (SAVE THIS!)
       uses: actions/upload-artifact@v4
