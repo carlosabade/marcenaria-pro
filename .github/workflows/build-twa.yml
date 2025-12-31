@@ -58,7 +58,8 @@ jobs:
           "regenerate" { send "y\r"; exp_continue }
           "Create" { send "y\r"; exp_continue }
           "versionName" { send "1.0.0\r"; exp_continue }
-          "versionCode" { send "9\r"; exp_continue }
+          "versionCode" { send "10\r"; exp_continue }
+          "Password" { send "password\r"; exp_continue }
           eof
         }
         EOF
