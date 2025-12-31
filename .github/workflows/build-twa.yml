@@ -58,13 +58,16 @@ jobs:
           "regenerate" { send "y\r"; exp_continue }
           "Create" { send "y\r"; exp_continue }
           "versionName" { send "1.0.0\r"; exp_continue }
-          "versionCode" { send "11\r"; exp_continue }
+          "versionCode" { send "12\r"; exp_continue }
           "Password" { send "password\r"; exp_continue }
           eof
         }
         EOF
         chmod +x build.exp
         ./build.exp
+
+    - name: List Files (Debug)
+      run: find . -maxdepth 4 -not -path '*/.*'
 
     - name: Upload AAB Artifact
       uses: actions/upload-artifact@v4
