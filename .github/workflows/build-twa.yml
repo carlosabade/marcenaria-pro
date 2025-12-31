@@ -58,7 +58,7 @@ jobs:
           "regenerate" { send "y\r"; exp_continue }
           "Create" { send "y\r"; exp_continue }
           "versionName" { send "1.0.0\r"; exp_continue }
-          "versionCode" { send "18\r"; exp_continue }
+          "versionCode" { send "20\r"; exp_continue }
           -re "(?i).*notification.*" { send "n\r"; exp_continue }
           "Password" { send "password\r"; exp_continue }
           eof
@@ -75,12 +75,21 @@ jobs:
         cat app/build.gradle
         echo "============================"
 
-    - name: Force Build and Locate AAB
+    - name: Force Build, Locate and Sign AAB
       run: |
         cp android.keystore app/android.keystore || true
         chmod +x gradlew
         ./gradlew bundleRelease
+        
+        # Locate the AAB
         find app/build/outputs/bundle/release -name "*.aab" -exec cp {} app-release-bundle.aab \;
+        
+        # Manually Sign the AAB to be absolutely sure
+        echo "Signing AAB manually..."
+        jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore android.keystore -storepass password -keypass password app-release-bundle.aab android
+        
+        # Verify Signature
+        jarsigner -verify -verbose -certs app-release-bundle.aab
 
     - name: List Files (Debug)
       run: find . -maxdepth 4 -not -path '*/.*'
