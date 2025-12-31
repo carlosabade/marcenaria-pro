@@ -13,13 +13,13 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
-  
+
   // State for result
   const [result, setResult] = useState<VoiceCommandResult | null>(null);
 
   // Browser Speech Recognition Support
   const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-  
+
   // Use useMemo to ensure the recognition instance remains stable across renders
   const recognition = useMemo(() => {
     return SpeechRecognition ? new SpeechRecognition() : null;
@@ -41,7 +41,7 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
       recognition.onend = () => {
         setIsListening(false);
       };
-      
+
       recognition.onerror = (event: any) => {
         console.error("Speech error", event.error);
         setIsListening(false);
@@ -52,21 +52,27 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
 
   const toggleListening = () => {
     if (!recognition) {
-      alert("Seu navegador não suporta reconhecimento de voz.");
+      alert("Seu navegador não suporta reconhecimento de voz nativo. Tente usar o Chrome ou Edge.");
       return;
     }
+
     if (isListening) {
-      recognition.stop();
+      try {
+        recognition.stop();
+      } catch (e) {
+        console.error("Error stopping recognition:", e);
+      }
+      setIsListening(false);
     } else {
       setTranscript('');
       setResult(null);
       try {
-          recognition.start();
-          setIsListening(true);
+        recognition.start();
+        setIsListening(true);
       } catch (e) {
-          console.error("Error starting recognition:", e);
-          // If already started, stop it and try again or just stop status
-          setIsListening(false);
+        console.error("Error starting recognition:", e);
+        setIsListening(false);
+        alert("Erro ao iniciar microfone. Verifique as permissões.");
       }
     }
   };
@@ -75,7 +81,7 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
     setIsProcessing(true);
     const parsed = await parseVoiceCommand(text);
     setIsProcessing(false);
-    
+
     if (parsed) {
       setResult(parsed);
     } else {
@@ -87,11 +93,11 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
     if (!result) return;
 
     if (result.type === 'expense') {
-        onSaveExpense(result.data);
+      onSaveExpense(result.data);
     } else if (result.type === 'appointment') {
-        onSaveAppointment(result.data);
+      onSaveAppointment(result.data);
     }
-    
+
     // Reset
     setResult(null);
     setTranscript('');
@@ -100,73 +106,73 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
   // --- RENDER HELPERS ---
 
   const renderExpenseForm = (data: any) => (
-      <div className="grid grid-cols-2 gap-3 animate-fade-in">
-        <div className="col-span-2">
-            <label className="text-xs text-slate-500">Descrição do Gasto</label>
-            <input 
-            value={data.description}
-            onChange={(e) => setResult({ type: 'expense', data: {...data, description: e.target.value} })}
-            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
-            />
-        </div>
-        <div>
-            <label className="text-xs text-slate-500">Valor (R$)</label>
-            <input 
-            type="number"
-            value={data.amount}
-            onChange={(e) => setResult({ type: 'expense', data: {...data, amount: Number(e.target.value)} })}
-            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
-            />
-        </div>
-        <div>
-            <label className="text-xs text-slate-500">Categoria</label>
-            <select 
-            value={data.category}
-            onChange={(e) => setResult({ type: 'expense', data: {...data, category: e.target.value as ExpenseCategory} })}
-            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"
-            >
-            {Object.values(ExpenseCategory).map(c => (
-                <option key={c} value={c}>{c}</option>
-            ))}
-            </select>
-        </div>
+    <div className="grid grid-cols-2 gap-3 animate-fade-in">
+      <div className="col-span-2">
+        <label className="text-xs text-slate-500">Descrição do Gasto</label>
+        <input
+          value={data.description}
+          onChange={(e) => setResult({ type: 'expense', data: { ...data, description: e.target.value } })}
+          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
+        />
       </div>
+      <div>
+        <label className="text-xs text-slate-500">Valor (R$)</label>
+        <input
+          type="number"
+          value={data.amount}
+          onChange={(e) => setResult({ type: 'expense', data: { ...data, amount: Number(e.target.value) } })}
+          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
+        />
+      </div>
+      <div>
+        <label className="text-xs text-slate-500">Categoria</label>
+        <select
+          value={data.category}
+          onChange={(e) => setResult({ type: 'expense', data: { ...data, category: e.target.value as ExpenseCategory } })}
+          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"
+        >
+          {Object.values(ExpenseCategory).map(c => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+    </div>
   );
 
   const renderAppointmentForm = (data: any) => (
-      <div className="grid grid-cols-1 gap-3 animate-fade-in">
-          <div className="bg-wood-900/30 p-2 rounded border border-wood-800/50 mb-2 flex items-center gap-2">
-              <Icons.Calendar className="text-wood-400 w-5 h-5" />
-              <span className="text-sm text-wood-200">Novo Compromisso Detectado</span>
-          </div>
-          <div>
-            <label className="text-xs text-slate-500">O que fazer?</label>
-            <input 
-                value={data.title}
-                onChange={(e) => setResult({ type: 'appointment', data: {...data, title: e.target.value} })}
-                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-             <div>
-                <label className="text-xs text-slate-500">Data e Hora</label>
-                <input 
-                    type="datetime-local"
-                    value={data.date ? data.date.slice(0, 16) : ''}
-                    onChange={(e) => setResult({ type: 'appointment', data: {...data, date: new Date(e.target.value).toISOString()} })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"
-                />
-             </div>
-             <div>
-                <label className="text-xs text-slate-500">Local (Opcional)</label>
-                <input 
-                    value={data.location || ''}
-                    onChange={(e) => setResult({ type: 'appointment', data: {...data, location: e.target.value} })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
-                />
-             </div>
-          </div>
+    <div className="grid grid-cols-1 gap-3 animate-fade-in">
+      <div className="bg-wood-900/30 p-2 rounded border border-wood-800/50 mb-2 flex items-center gap-2">
+        <Icons.Calendar className="text-wood-400 w-5 h-5" />
+        <span className="text-sm text-wood-200">Novo Compromisso Detectado</span>
       </div>
+      <div>
+        <label className="text-xs text-slate-500">O que fazer?</label>
+        <input
+          value={data.title}
+          onChange={(e) => setResult({ type: 'appointment', data: { ...data, title: e.target.value } })}
+          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-slate-500">Data e Hora</label>
+          <input
+            type="datetime-local"
+            value={data.date ? data.date.slice(0, 16) : ''}
+            onChange={(e) => setResult({ type: 'appointment', data: { ...data, date: new Date(e.target.value).toISOString() } })}
+            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-slate-500">Local (Opcional)</label>
+          <input
+            value={data.location || ''}
+            onChange={(e) => setResult({ type: 'appointment', data: { ...data, location: e.target.value } })}
+            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"
+          />
+        </div>
+      </div>
+    </div>
   );
 
   return (
@@ -180,25 +186,24 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
         <div className="flex flex-col items-center justify-center gap-4">
           <button
             onClick={toggleListening}
-            className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
-              isListening 
-                ? 'bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]' 
+            className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
+                ? 'bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]'
                 : 'bg-wood-600 hover:bg-wood-500 shadow-lg'
-            }`}
+              }`}
           >
             <Icons.Mic className={`w-8 h-8 text-white ${isListening ? 'animate-bounce' : ''}`} />
           </button>
-          
+
           <div className="text-slate-400 text-center text-sm">
             {isListening ? "Ouvindo... Toque para parar" : isProcessing ? "Processando com IA..." : "Toque para falar"}
-            <br/>
+            <br />
             <div className="flex gap-4 justify-center mt-2 text-xs text-slate-500 italic">
-                <span>"Gastei 120 de gasolina"</span>
-                <span className="text-slate-700">|</span>
-                <span>"Agendar visita amanhã às 14h"</span>
+              <span>"Gastei 120 de gasolina"</span>
+              <span className="text-slate-700">|</span>
+              <span>"Agendar visita amanhã às 14h"</span>
             </div>
           </div>
-          
+
           {transcript && !isProcessing && (
             <div className="bg-slate-900 p-3 rounded-lg text-slate-300 text-sm italic w-full text-center">
               "{transcript}"
@@ -207,21 +212,21 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
         </div>
       ) : (
         <div className="space-y-4">
-          
+
           {result.type === 'expense' ? renderExpenseForm(result.data) : renderAppointmentForm(result.data)}
-          
+
           <div className="flex gap-2 pt-2">
-            <button 
+            <button
               onClick={() => setResult(null)}
               className="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium"
             >
               Cancelar
             </button>
-            <button 
+            <button
               onClick={handleConfirm}
               className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium flex justify-center items-center gap-2"
             >
-              <Icons.Save className="w-4 h-4" /> 
+              <Icons.Save className="w-4 h-4" />
               {result.type === 'expense' ? 'Salvar Gasto' : 'Agendar'}
             </button>
           </div>
