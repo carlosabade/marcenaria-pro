@@ -39,8 +39,19 @@ jobs:
         keytool -list -v -keystore android.keystore -alias android -storepass password | grep "SHA256:"
         echo "=================================================================="
 
+    - name: Configure Bubblewrap (Non-interactive)
+      run: |
+        mkdir -p $HOME/.bubblewrap
+        echo "{\"jdkPath\": \"${JAVA_HOME}\", \"androidSdkPath\": \"${ANDROID_HOME}\"}" > $HOME/.bubblewrap/config.json
+        cat $HOME/.bubblewrap/config.json
+
+    - name: Initialize TWA Project
+      run: bubblewrap init --manifest twa-manifest.json --directory android-project
+
     - name: Build TWA
-      run: bubblewrap build --manifest twa-manifest.json --skipPwaValidation
+      run: |
+        cd android-project
+        bubblewrap build
 
     - name: Upload AAB Artifact
       uses: actions/upload-artifact@v4
