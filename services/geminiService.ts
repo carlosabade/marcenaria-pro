@@ -175,6 +175,8 @@ export const generateImageFromSketch = async (sketchBase64: string, prompt: stri
 
         if (response.status === 429) {
           console.warn(`Limite excedido para ${model} (429), tentando próximo...`);
+          // If it's the last attempt or all fail, we want to know it was a quota issue
+          lastError = new Error("Cota da IA excedida. Tente novamente mais tarde.");
           continue;
         }
 

@@ -197,68 +197,70 @@ const VoiceExpenseInput: React.FC<VoiceExpenseInputProps> = ({ onSaveExpense, on
   );
 
   return (
-    <h3 className="text-lg font-semibold text-wood-300 mb-4 flex items-center gap-2">
-      <Icons.Mic className="w-5 h-5" />
-      Comando de Voz V3
-    </h3>
+    <div className="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
+      <h3 className="text-lg font-semibold text-wood-300 mb-4 flex items-center gap-2">
+        <Icons.Mic className="w-5 h-5" />
+        Comando de Voz V3
+      </h3>
 
-      {
-    !result ? (
-      <div className="flex flex-col items-center justify-center gap-4">
-        <button
-          onClick={toggleListening}
-          className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
-            ? 'bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]'
-            : 'bg-wood-600 hover:bg-wood-500 shadow-lg'
-            }`}
-        >
-          <Icons.Mic className={`w-8 h-8 text-white ${isListening ? 'animate-bounce' : ''}`} />
-        </button>
+      {!result ? (
+        <div className="flex flex-col items-center justify-center gap-4">
+          <button
+            onClick={toggleListening}
+            className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
+              ? 'bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]'
+              : 'bg-wood-600 hover:bg-wood-500 shadow-lg'
+              }`}
+          >
+            <Icons.Mic className={`w-8 h-8 text-white ${isListening ? 'animate-bounce' : ''}`} />
+          </button>
 
-        <div className="text-slate-400 text-center text-sm">
-          {isListening ? "Ouvindo... Toque para parar" : isProcessing ? "Processando com IA..." : "Toque para falar"}
-          <br />
-          <div className="flex gap-4 justify-center mt-2 text-xs text-slate-500 italic">
-            <span>"Gastei 120 de gasolina"</span>
-            <span className="text-slate-700">|</span>
-            <span>"Agendar visita amanhã às 14h"</span>
+          <div className="text-slate-400 text-center text-sm">
+            {isListening ? "Ouvindo... Toque para parar" : isProcessing ? "Processando com IA..." : "Toque para falar"}
+            <br />
+            <div className="flex gap-4 justify-center mt-2 text-xs text-slate-500 italic">
+              <span>"Gastei 120 de gasolina"</span>
+              <span className="text-slate-700">|</span>
+              <span>"Agendar visita amanhã às 14h"</span>
+            </div>
+          </div>
+
+          {transcript && !isProcessing && (
+            <div className="bg-slate-900 p-3 rounded-lg text-slate-300 text-sm italic w-full text-center">
+              "{transcript}"
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+
+          {result.type === 'expense' ? renderExpenseForm(result.data) : renderAppointmentForm(result.data)}
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={() => setResult(null)}
+              className="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirm}
+              className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium flex justify-center items-center gap-2"
+            >
+              <Icons.Save className="w-4 h-4" />
+              {result.type === 'expense' ? 'Salvar Gasto' : 'Agendar'}
+            </button>
           </div>
         </div>
-
-        {transcript && !isProcessing && (
-          <div className="bg-slate-900 p-3 rounded-lg text-slate-300 text-sm italic w-full text-center">
-            "{transcript}"
-          </div>
-        )}
-      </div>
-    ) : (
-      <div className="space-y-4">
-
-        {result.type === 'expense' ? renderExpenseForm(result.data) : renderAppointmentForm(result.data)}
-
-        <div className="flex gap-2 pt-2">
-          <button
-            onClick={() => setResult(null)}
-            className="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleConfirm}
-            className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium flex justify-center items-center gap-2"
-          >
-            <Icons.Save className="w-4 h-4" />
-            {result.type === 'expense' ? 'Salvar Gasto' : 'Agendar'}
-          </button>
+      )}
+      <div className="mt-4 pt-4 border-t border-slate-700/50 flex flex-col gap-1 text-[10px] text-slate-600 font-mono">
+        <div className="flex justify-between">
+          <span>Sys v2.3 (Key: {getSettings().googleApiKey ? 'Custom' : 'System'})</span>
+          <span>{SpeechRecognition ? 'Mic: OK' : 'Mic: Error'}</span>
         </div>
+        <div className="text-amber-500/80 truncate">Logs: {statusLog}</div>
       </div>
-    )
-  }
-  <div className="mt-4 pt-4 border-t border-slate-700/50 flex justify-between items-center text-[10px] text-slate-600 font-mono">
-    <span>Sys v2.2 (Key: {getSettings().googleApiKey ? 'Custom' : 'System'})</span>
-    <span>{SpeechRecognition ? 'Mic: OK' : 'Mic: Error'}</span>
-  </div>
-    </div >
+    </div>
   );
 };
 
