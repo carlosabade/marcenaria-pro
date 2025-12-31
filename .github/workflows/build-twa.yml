@@ -46,7 +46,8 @@ jobs:
         cat $HOME/.bubblewrap/config.json
 
     - name: Build TWA
-      run: bubblewrap build --manifest twa-manifest.json --skipPwaValidation
+      run: |
+        (echo "y"; echo "1.0.0"; echo "6") | bubblewrap build --manifest twa-manifest.json --skipPwaValidation
 
     - name: Upload AAB Artifact
       uses: actions/upload-artifact@v4
