@@ -70,7 +70,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-release-bundle
-        path: ./*.aab
+        path: app/build/outputs/bundle/release/app-release-bundle.aab
 
     - name: Upload Keystore (SAVE THIS!)
       uses: actions/upload-artifact@v4
