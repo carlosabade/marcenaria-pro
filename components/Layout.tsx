@@ -33,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
 
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Visão Geral', icon: Icons.Dashboard },
-   { id: 'projects', label: 'Projetos', icon: Icons.Clipboard },
+   { id: 'projects', label: 'Projetos', icon: Icons.Hammer },
     { id: 'clients', label: 'Clientes', icon: Icons.Users },
     { id: 'catalog', label: 'Catálogo MDF', icon: Icons.Book },
     { id: 'ai-studio', label: 'Estúdio 2D', icon: Icons.Layout },
